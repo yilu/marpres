@@ -1,6 +1,7 @@
 import { initialState, reducePresentation, nextPosition, currentInk, inkKey, elapsedTime, publicState, restoreState, contextualActions } from './model.mjs'
 import { SlideView } from './view.js'
 import { createOverlay } from './overlay.js'
+import { setupPresenterLayout } from './layout.js'
 
 const $=selector=>document.querySelector(selector)
 const role=document.body.dataset.role, presenter=role==='presenter'
@@ -189,9 +190,7 @@ function setupConsole() {
   $('#end').addEventListener('click',endPresentation)
   $('#help-toggle').addEventListener('click',()=>$('#help').showModal())
   $('#help-close').addEventListener('click',()=>$('#help').close())
-  $('#notes-toggle').addEventListener('click',()=>{const hidden=!$('#notes').hidden;$('#notes').hidden=hidden;$('#notes-toggle').textContent=hidden?'Show':'Hide';$('#notes-toggle').setAttribute('aria-pressed',String(!hidden))})
-  let notesSize=17
-  for(const [button,delta] of [['notes-smaller',-1],['notes-larger',1]])$('#'+button).addEventListener('click',()=>{notesSize=Math.max(12,Math.min(32,notesSize+delta));$('#notes').style.setProperty('--notes-size',`${notesSize}px`)})
+  setupPresenterLayout()
   view=new SlideView($('#current-view'),deck)
   nextView=new SlideView($('#next-view'),deck,{label:'Next reveal preview'})
   overlay=createOverlay({host:view.viewport,onAction:dispatch})
@@ -208,7 +207,7 @@ function setupAudience() {
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)hello()})
 }
 function keys(event) {
-  if(ended||!state||event.altKey||event.target.closest('input,textarea,select,[contenteditable=true]')||$('#help').open)return
+  if(ended||!state||event.altKey||event.target.closest('input,textarea,select,[contenteditable=true],[role=separator]')||$('#help').open)return
   if(event.target.closest('button,a')&&[' ','Enter'].includes(event.key))return
   let action
   if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='z')action={type:event.shiftKey?'redo':'undo'}
