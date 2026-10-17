@@ -35,7 +35,19 @@ Use one notes comment per slide. Its opening and closing markers must be on sepa
 
 Notes appear only in the console. They are absent from the audience snapshot, its rendered frame, and the generated PDF/HTML. The presenter URL contains a private capability in its fragment; do not share that URL as an audience link. Markdown source files still contain their notes.
 
-The console can hide notes or enlarge their text. Change their contents in the editor, then start a new presentation to use the updated source.
+Drag the divider beside the current slide to widen the notes column. The next preview and timer leave most of that column's height for notes; **A− / A+** adjusts note text size. With the divider focused, use Left/Right to resize, Shift for larger steps, and Home/End for the minimum/maximum width. These keys do not navigate slides while the divider is focused.
+
+**Hide** collapses the entire notes or next-preview card, giving its space to the remaining card. The footer's **Notes** and **Next preview** buttons restore them. **Reset layout** restores the default width, visible cards, and text size. These preferences persist in the browser independently of slide position, timer, and ink; narrow windows use a stacked layout.
+
+Change note contents in the editor, then start a new presentation to use the updated source.
+
+## Display resolution
+
+Audience slides are live HTML and SVG, not screenshots. Text, SVG equations, SVG figures, and vector annotations render at the display's resolution. The slide document retains a 1280 × 720 logical viewport and scales proportionally to the window, with letterboxing when needed. This keeps authored CSS, including viewport units and media queries, consistent between the console and audience.
+
+PNG, JPEG, and other bitmap figures retain their original pixel dimensions. Enlarging a low-resolution figure cannot add detail; use an SVG source or a larger original when available. Image imports are not downsampled. Browser zoom and operating-system display scaling can also affect apparent sharpness.
+
+Automated Chrome checks cover 3840 × 2160 at device pixel ratios 1 and 2, resizing, sharp SVG detail, authored CSS consistency, and annotation alignment. The previously reported monitor blur was not reproduced in those checks.
 
 ## Pointers, ink, and whiteboard
 

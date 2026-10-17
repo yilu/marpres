@@ -108,7 +108,7 @@ Reveals are cumulative: stage 0 appears first, followed by each used positive st
 
 Marpres currently provides a local, single-user editor and 16:9 HTML/PDF output. Editable PowerPoint/Keynote export, attached diagram connectors, and automatic collision avoidance are not implemented. Remote images can display in Markdown; crop figures require local image files.
 
-For two-screen talks, see the [presenter guide](docs/presenter.md). Add hidden Markdown notes with **Notes** in the editor. Presentations use a fixed snapshot; live pointers, slide annotations, and the whiteboard do not change your deck or exports. Move the audience window to the second display and enter fullscreen there.
+For two-screen talks, see the [presenter guide](docs/presenter.md). Add hidden Markdown notes with **Notes** in the editor. Resize the console's notes column with its divider, or hide notes/next preview to give the other card more room. Presentations use a fixed snapshot; live pointers, slide annotations, and the whiteboard do not change your deck or exports. Move the audience window to the second display and enter fullscreen there. Text, equations, and SVG remain vector-rendered; bitmap figures retain their source resolution.
 
 Existing decks have a retained legacy rendering path. See [compatibility and migration](docs/compatibility.md) before moving a deck between renderers.
 
