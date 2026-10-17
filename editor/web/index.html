@@ -19,6 +19,7 @@
     <symbol id="i-undo" viewBox="0 0 24 24"><path d="m8 4-5 5 5 5M3 9h11a6 6 0 0 1 0 12h-2"/></symbol>
     <symbol id="i-redo" viewBox="0 0 24 24"><path d="m16 4 5 5-5 5m5-5H10a6 6 0 0 0 0 12h2"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="m7 4 14 8-14 8Z"/></symbol>
+    <symbol id="i-preview" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></symbol>
@@ -47,8 +48,8 @@
       <button id="shape-menu-toggle" class="command" aria-expanded="false" aria-controls="shape-gallery" disabled><svg class="icon"><use href="#i-shape"/></svg><span>Shape</span><span class="chevron">⌄</span></button>
     </div>
     <span class="command-spacer"></span>
-    <button id="play" class="command play-button" disabled><svg class="icon"><use href="#i-play"/></svg><span>Play</span></button>
-    <button id="present" class="command" title="Open presenter console with private notes and an audience window" disabled><svg class="icon"><use href="#i-play"/></svg><span>Present</span></button>
+    <button id="play" class="command" aria-label="Preview" title="Preview slides inside this editor · Escape returns to editing" disabled><svg class="icon"><use href="#i-preview"/></svg><span>Preview</span></button>
+    <button id="present" class="command present-button" aria-label="Present" title="Open presenter console with notes and a separate audience window" disabled><svg class="icon"><use href="#i-play"/></svg><span>Present</span></button>
     <button id="export-pdf" class="command" disabled><svg class="icon"><use href="#i-export"/></svg><span>Export PDF</span></button>
   </header>
   <div class="context-bar" aria-label="Formatting toolbar">
@@ -101,6 +102,6 @@
   <div id="shape-gallery" class="shape-gallery" role="dialog" aria-label="Insert shape" hidden><div class="gallery-heading"><strong>Shapes</strong><button id="close-shapes" class="icon-button" aria-label="Close shapes"><svg class="icon"><use href="#i-close"/></svg></button></div><div id="shape-groups"></div><form id="insert-form" hidden><select id="shape-type" aria-label="Shape type"><option value="arrow">Arrow</option></select><button id="insert-shape" type="submit">Insert</button></form></div>
   <div id="selection-marquee" hidden></div>
   <div id="presenter-fallback" role="status" hidden><span>Your browser blocked the new window.</span> <a target="_blank" rel="noopener">Open presenter console ↗</a><button type="button" aria-label="Dismiss presenter link" onclick="this.parentElement.hidden=true">×</button></div>
-  <div id="presentation-controls" hidden><button id="presentation-exit"><svg class="icon"><use href="#i-close"/></svg>Exit presentation</button><span id="presentation-position"></span><button id="presentation-previous" aria-label="Previous presentation step">‹</button><button id="presentation-next" aria-label="Next presentation step">›</button></div>
+  <div id="presentation-controls" hidden><button id="presentation-exit"><svg class="icon"><use href="#i-close"/></svg>Exit preview</button><span id="presentation-position"></span><button id="presentation-previous" aria-label="Previous preview step">‹</button><button id="presentation-next" aria-label="Next preview step">›</button></div>
 </body>
 </html>

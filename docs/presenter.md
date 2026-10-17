@@ -1,6 +1,8 @@
 # Presenting with Marpres
 
-Use **Play** for a quick rehearsal inside the editor. Use **Present** for an audience window and a separate presenter console.
+**Present** is the primary toolbar action for an audience window and a separate presenter console. The secondary **Preview** button (eye icon) runs a quick rehearsal inside the editor; Escape returns to editing. Both save valid drafts before starting.
+
+These interfaces are optional. Markdown-only builds and the original template’s native Marp CLI workflow remain available; see [compatibility](compatibility.md).
 
 ## Start a two-screen presentation
 
@@ -16,7 +18,7 @@ The console shows the current slide, the next reveal, speaker notes, elapsed tim
 
 ## Speaker notes
 
-Choose **Notes** at the bottom of the editor to write Markdown notes for the selected slide. **Save notes** is undoable; valid drafts are also saved before Play, Present, PDF export, and slide reordering. Conflicting drafts stay available until you explicitly keep or discard them.
+Choose **Notes** at the bottom of the editor to write Markdown notes for the selected slide. **Save notes** is undoable; valid drafts are also saved before Preview, Present, PDF export, and slide reordering. Conflicting drafts stay available until you explicitly keep or discard them.
 
 Notes are stored as an explicit hidden comment on their slide:
 

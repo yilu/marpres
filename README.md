@@ -4,7 +4,17 @@
 
 **Write slides in Markdown. Refine them visually.**
 
-Marpres is an independent presentation tool built on [Marp](https://marp.app/). Use Markdown for the narrative, equations, figures, and reusable layouts; use the local browser editor for placement, cropping, typography, and diagrams. Both work on the same Markdown file.
+Marpres combines a [Marp](https://marp.app/) template and layout system with an **optional visual editor and presenter console**. Write the entire deck in Markdown, refine it in the browser when useful, and choose how to present it. The Markdown file remains the source.
+
+**The original template still works directly with Marp CLI.** Its bundled configuration loads the original layout plugin and theme; no Marpres editor server or presenter session is needed. The newer Marpres layouts can also be built entirely from the command line.
+
+| Workflow | Command | What it provides |
+| --- | --- | --- |
+| Original template through Marp CLI | `npm run legacy:html` / `npm run legacy:pdf` | The original template example, using its retained engine and theme |
+| Current layouts, Markdown only | `npm run build -- slides/my-talk.md` | HTML/PDF with Marpres layouts, cropping, styles, and cumulative reveals |
+| Optional visual editing and presenting | `npm run dev -- slides/my-talk.md` | The browser editor, quick Preview, and two-screen Present |
+
+Custom columns and grids require the layout plugin as well as the CSS. See [native Marp usage and compatibility](docs/compatibility.md) for existing decks and the distinction between Marp CLI and a stock editor preview.
 
 ## Quickstart
 
@@ -14,6 +24,20 @@ Install **Node.js 20 or later** and **Google Chrome**, then:
 git clone https://github.com/yilu/marpres.git
 cd marpres
 npm ci
+```
+
+For a Markdown-only start, copy the starter, edit it in your preferred text editor, and build:
+
+```sh
+cp slides/starter.md slides/my-talk.md
+npm run build -- slides/my-talk.md
+```
+
+This writes `dist/my-talk.html` and `dist/my-talk.pdf`. To try the original template through Marp CLI, run `npm run legacy:html` or `npm run legacy:pdf`; the output is `dist/legacy-demo.html` or `.pdf`.
+
+To open the visual editor:
+
+```sh
 npm run dev
 ```
 
@@ -22,7 +46,6 @@ Open **http://127.0.0.1:3030**. The editor opens [the demo](slides/demo.md), whi
 To start your own presentation:
 
 ```sh
-cp slides/starter.md slides/my-talk.md
 npm run dev -- slides/my-talk.md --port 3031
 ```
 
@@ -37,7 +60,7 @@ CHROME_PATH=/path/to/chrome npm run build
 1. **Write the content.** Start with `theme: marpres`. Put selectable text in `::: box id=...` blocks and images in `::: figure id=...` blocks. Give every editable object a unique ID across the deck.
 2. **Arrange it visually.** Select and drag objects, resize with handles, and double-click a figure to crop. Double-click text to edit it in the inspector; **Apply text** saves the draft.
 3. **Set a shared style.** Open **Theme** to preview fonts, light/dark palettes, CSS, and title/footer/page-number positions on actual slides. **Apply to deck** saves one undoable change. Presets let you reuse these settings in another deck.
-4. **Rehearse, present, and export.** **Play** rehearses from the current slide. **Present** opens a console with current/next previews, notes, timer, pointers, and drawing tools; its **Open audience window** button creates the second-screen view. **Export PDF** downloads the presentation.
+4. **Rehearse, present, and export.** **Preview** rehearses inside the editor; Escape returns to editing. The primary **Present** button opens a console with current/next previews, notes, timer, pointers, and drawing tools; its **Open audience window** button creates the second-screen view. **Export PDF** downloads the presentation.
 
 The [authoring guide](docs/authoring.md) covers syntax, shortcuts, and the complete workflow. The [starter deck](slides/starter.md) is a small starting point; the [demo](slides/demo.md) shows the features together.
 
@@ -60,11 +83,15 @@ Figure alignment uses the visible cropped frame. Double-click a figure to drag i
 
 ### Source, text, and history
 
-The horizontal toolbar formats whole text blocks. The text editor has separate buttons for formatting selected words. Math and Markdown remain in the source. Text drafts survive selection changes; Play and PDF export save valid drafts first and stop for unresolved conflicts.
+The horizontal toolbar formats whole text blocks. The text editor has separate buttons for formatting selected words. Math and Markdown remain in the source. Text drafts survive selection changes; Preview, Present, and PDF export save valid drafts first and stop for unresolved conflicts.
 
 **Show source** highlights the selected object's Markdown in a read-only pane. Click a source line to select its object, or use **Open in VS Code** to open that file location. Save external Markdown edits, then use **Reload source** when the editor detects the change.
 
 Undo/redo belongs to the running editor server and survives a browser refresh. It resets when the server restarts or the source changes externally. Use Git for durable project history.
+
+### Image files
+
+**Image** copies a selected file into `figures/imported/` beside the deck's Markdown, then inserts a relative reference. Content-based filenames avoid collisions and reuse identical images. The original stays untouched; crop and layout settings live in Markdown. Imported files remain after object deletion so undo/redo can restore them. Keep each talk in its own folder if you want separate asset collections. See [image management](docs/assets.md) for folder examples and sharing.
 
 ## Build HTML and PDF
 
@@ -73,7 +100,7 @@ npm run build
 npm run build -- slides/my-talk.md
 ```
 
-The first command writes `dist/demo.html` and `dist/demo.pdf`; the second writes `dist/my-talk.html` and `dist/my-talk.pdf`. Exports use the presentation renderer without editing guides or selection handles.
+The first command writes `dist/demo.html` and `dist/demo.pdf`; the second writes `dist/my-talk.html` and `dist/my-talk.pdf`. Neither command requires the GUI or a running editor server. Exports use the current Marpres renderer without editing guides or selection handles. For the original template, use the [Marp CLI configuration](docs/compatibility.md#build-an-existing-legacy-deck).
 
 Reveals are cumulative: stage 0 appears first, followed by each used positive stage. PDF contains one page per stage; exported HTML provides stage navigation. Slides without reveals export as one page each. The [authoring guide](docs/authoring.md#reveal-stages-and-playback) explains the details.
 
@@ -95,6 +122,7 @@ Existing decks have a retained legacy rendering path. See [compatibility and mig
 | `editor/web/` | Browser editor, source pane, and theme preview |
 | `presenter/` | Dual-window console, audience view, navigation, pointers, and live ink |
 | `engine/layout.mjs` | Presentation layout and editable-object rendering |
+| `marp.config.mjs`, `engine/layout-engine.mjs` | Original template's direct Marp CLI configuration and layout plugin |
 | `engine/`, `themes/` | Shared validation, shapes, design settings, and themes |
 | `scripts/` | HTML/PDF rendering and export |
 | `test/` | Source, rendering, compatibility, and browser checks |
@@ -117,3 +145,7 @@ npm run test:presenter
 ```
 
 Feature browser checks use temporary decks; layout checks render the demo and fixtures without editing them. All use installed Chrome. Set `CHROME_PATH` when needed. See the [development guide](docs/development.md) for release checks and the current dependency baseline, and `package.json` for all focused checks.
+
+## License
+
+Marpres code and documentation are licensed under the [MIT License](LICENSE), copyright © 2026 Yi Lu and Marpres contributors. Third-party dependencies, the Outfit font, and retained institutional-logo fixtures have their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md). The software license does not change ownership of presentations or images you create or import.

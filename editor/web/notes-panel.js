@@ -28,7 +28,7 @@ export function createNotesPanel({ getDeck, getPage, canMutate, mutate, navigate
     save.disabled = !canMutate() || !pending || changed || invalid
     discard.hidden = !pending; keep.hidden = !changed
     discard.disabled = keep.disabled = !canMutate()
-    notice.textContent = invalid ? 'Notes cannot contain the HTML comment terminator -->.' : changed ? 'Source changed. Review this slide, then keep or discard your draft.' : pending ? 'Unsaved notes · saved before Play, Present, and PDF.' : 'Notes saved'
+    notice.textContent = invalid ? 'Notes cannot contain the HTML comment terminator -->.' : changed ? 'Source changed. Review this slide, then keep or discard your draft.' : pending ? 'Unsaved notes · saved before Preview, Present, and PDF.' : 'Notes saved'
     notice.dataset.state = invalid || changed ? 'error' : pending ? 'draft' : 'saved'
   }
   text.addEventListener('input', () => {

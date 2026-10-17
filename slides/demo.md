@@ -39,7 +39,7 @@ A hands-on tour · 12 slides · one Markdown source
 <!-- notes
 Introduce the source-and-canvas workflow.
 
-- Use **Present** for two screens and **Play** for a quick rehearsal.
+- Use **Present** for two screens and **Preview** for a quick rehearsal.
 - Move the audience window to the second display, then enter fullscreen there.
 - Start the timer when speaking begins.
 
@@ -384,7 +384,7 @@ Leave one idea to remember.
 ::::
 
 ::: footer
-Try it · Play, then press Space or →. Each cumulative stage becomes a PDF page.
+Try it · Preview, then press Space or →. Each cumulative stage becomes a PDF page.
 :::
 
 <!-- notes
@@ -496,7 +496,7 @@ Start your next deck with `slides/starter.md`.
 
 :::: panel id=finish-output-panel align=left valign=center
 ::: box id=finish-play-heading font=34
-**Play**
+**Preview**
 :::
 ::: box id=finish-play-copy font=25
 Present from the current slide and reveal stages in order.

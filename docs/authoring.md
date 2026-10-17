@@ -4,25 +4,23 @@ A presentation is a Markdown file plus its assets. Marpres adds structured layou
 
 ## Open, edit, and build
 
+You can write and build a deck entirely in Markdown. The visual editor and presenter are optional. This guide describes the current Marpres layouts; for the original template through native Marp CLI, use the [compatibility guide](compatibility.md).
+
 Run commands from the project directory:
 
 ```sh
 npm ci
-npm run dev
+cp slides/starter.md slides/my-talk.md
+npm run build -- slides/my-talk.md
 ```
 
-The default editor opens `slides/demo.md` at `http://127.0.0.1:3030`. To work on another file:
+Edit `slides/my-talk.md` in your preferred text editor and rerun the build when needed. For optional visual refinement:
 
 ```sh
-cp slides/starter.md slides/my-talk.md
 npm run dev -- slides/my-talk.md --port 3031
 ```
 
-The server stays running until Ctrl+C. Each instance edits the file supplied to it. For HTML and PDF output:
-
-```sh
-npm run build -- slides/my-talk.md
-```
+Open `http://127.0.0.1:3031`. The server stays running until Ctrl+C and edits the file supplied to it. With no file argument, `npm run dev` opens the demo at `http://127.0.0.1:3030`. The build command works independently of this server.
 
 Output goes to `dist/my-talk.html` and `dist/my-talk.pdf`. With no file argument, `npm run build` builds the demo. A successful build exits with status 0; invalid layouts, unreadable assets, and rendering or browser failures produce a nonzero status. Read the reported diagnostics before using the output. An HTML file may already have been written if the later PDF step fails.
 
@@ -227,7 +225,7 @@ A figure contains exactly one Markdown image:
 
 Double-click a figure to enter crop mode. Drag a handle to change the visible region, or drag the image inside it to pan. Enter or **Apply crop** saves one undoable operation; Escape or **Cancel** restores the committed crop. Precise percentage inputs are also available. Alignment and snapping use the visible frame.
 
-Crop figures require local PNG, JPEG, SVG, GIF, or WebP files. Ordinary Markdown can display remote images, but remote URLs cannot supply measured crop figures. **Image** imports a local file of at most 10 MB into `figures/imported/` beside the deck. Deleting the figure or undoing its insertion leaves that asset available for redo.
+Crop figures require local PNG, JPEG, SVG, GIF, or WebP files. Ordinary Markdown can display remote images, but remote URLs cannot supply measured crop figures. **Image** imports a local file of at most 10 MB into `figures/imported/` beside the deck, using a content-based filename and a relative Markdown reference. Identical images share a stored copy. Deleting the figure or undoing its insertion leaves that asset available for redo. See [image management](assets.md) for folder layout, sharing, and cleanup.
 
 ## Layout offsets and free placement
 
@@ -349,7 +347,7 @@ Finish with the conclusion.
 
 This slide uses stages 0, 2, and 5; unused stage numbers are skipped. Stages are integers from 0 to 99. A panel can carry `stage=N` to reveal its group. Nested content cannot reveal before its enclosing staged container. Hidden objects retain their layout space.
 
-Use **Reveal → All** while arranging a slide. **Play** starts at stage 0 of the current slide, advances through its used stages, and then moves to the next slide. Use arrows, Space, or the on-screen controls; Escape returns to the editing view and restores its selection and zoom.
+Use **Reveal → All** while arranging a slide. **Preview** starts at stage 0 of the current slide, advances through its used stages, and then moves to the next slide. Use arrows, Space, or the on-screen controls; Escape returns to the editing view and restores its selection and zoom.
 
 PDF contains one physical page for stage 0 and each used positive stage. These pages keep their logical slide number. Exported HTML with reveals has Previous/Next controls and Arrow, PageUp/PageDown, Space, Home, and End navigation. A deck without reveals uses a scrolling HTML view and one PDF page per slide.
 
@@ -357,7 +355,7 @@ PDF contains one physical page for stage 0 and each used positive stage. These p
 
 Open the Markdown in your preferred editor and keep the browser beside it. **Source** opens the read-only source pane. **Show source** highlights the selected object's block; clicking a line navigates back to its slide or object. **Open in VS Code** opens the corresponding local file location when VS Code's URL handler is available.
 
-Geometry, style, crop, insertion, deletion, and arrangement operations save after completion. Text uses **Apply text**. Play and GUI PDF export first save valid pending text drafts. If external edits changed a draft's original content, explicitly keep or discard that draft before continuing.
+Geometry, style, crop, insertion, deletion, and arrangement operations save after completion. Text uses **Apply text**. Preview, Present, and GUI PDF export first save valid pending text drafts. If external edits changed a draft's original content, explicitly keep or discard that draft before continuing.
 
 External file edits trigger a source conflict. Save the external edit, choose **Reload source**, and review any retained text drafts. Undo/redo is kept in the running server, survives browser refresh, and resets after a server restart or external source change. Each application has its own editing history; use Git checkpoints for durable versions.
 
@@ -372,10 +370,10 @@ External file edits trigger a source conflict. Save the external edit, choose **
 | Cycle guides | G: off, layout, grid |
 | Temporarily bypass snapping | Hold Alt while dragging |
 | Apply/cancel cropping | Enter / Escape |
-| Leave Play | Escape |
+| Leave Preview | Escape |
 
 The fine grid is a visual guide. Optional snapping uses object and layout guides. There is no automatic collision avoidance, semantic connector routing, direct rich-text editing inside the slide, or editable PowerPoint/Keynote export. See [compatibility](compatibility.md) for renderer boundaries and the [presenter guide](presenter.md) for two-screen talks.
 
 ## Presenter mode and notes
 
-Use **Present** for two-screen talks. The console shows current/next previews, notes, a timer, pointer modes, and slide/whiteboard drawing tools. Add hidden Markdown notes with **Notes** in the editor. See the [presenter guide](presenter.md) for setup, shortcuts, and recovery. **Play** remains the quick rehearsal mode.
+Use **Present** for two-screen talks. The console shows current/next previews, notes, a timer, pointer modes, and slide/whiteboard drawing tools. Add hidden Markdown notes with **Notes** in the editor. See the [presenter guide](presenter.md) for setup, shortcuts, and recovery. **Preview** remains the quick rehearsal mode.

@@ -16,6 +16,8 @@ Use the symbol-only application icon at small sizes. Prefer SVG for slides and w
 
 ## Typography and licence
 
+The original Marpres artwork follows the project’s [MIT License](../../LICENSE). Font software retains its own license as described below.
+
 The wordmark uses **Outfit, weight 650**, converted to SVG outlines. No installed font or external font request is needed to display the artwork. The raster draft did not establish its original typeface or licence; the production wordmark uses this verified replacement.
 
 Outfit is distributed under the **SIL Open Font License 1.1**, which permits commercial use and creating logos. See the [upstream licence](https://github.com/google/fonts/blob/main/ofl/outfit/OFL.txt) and [OFL FAQ 1.1](https://openfontlicense.org/ofl-faq/#faq1_1). A copy is included as `OFL-Outfit.txt`. The complete font software is not bundled here.
