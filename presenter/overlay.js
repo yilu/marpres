@@ -26,6 +26,20 @@ export function createOverlay({ host, onAction = () => {} }) {
     overflow: 'hidden', touchAction: 'none', userSelect: 'none', cursor: 'none', zIndex: '10',
   })
   const defs = svgElement('defs')
+  const laserColorStops = []
+  const laserGradient = (name, stops) => {
+    const gradient = svgElement('radialGradient', { id: `${uid}-${name}`, cx: '50%', cy: '50%', r: '50%', 'color-interpolation': 'sRGB' })
+    for (const [offset, opacity, white = false] of stops) {
+      const stop = svgElement('stop', { offset, 'stop-color': white ? '#fff' : '#ef4444', 'stop-opacity': opacity })
+      if (!white) laserColorStops.push(stop)
+      gradient.append(stop)
+    }
+    defs.append(gradient)
+    return `url(#${uid}-${name})`
+  }
+  // Continuous falloff avoids the visible rings of stacked translucent disks.
+  const laserGlow = laserGradient('laser-glow', [[0,.42],[.12,.34],[.26,.21],[.46,.085],[.7,.022],[1,0]])
+  const laserCore = laserGradient('laser-core', [[0,1,true],[.16,1,true],[.4,1],[.65,.92],[.84,.4],[1,0]])
   const mask = svgElement('mask', { id: `${uid}-spotlight`, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: SLIDE_WIDTH, height: SLIDE_HEIGHT })
   mask.append(svgElement('rect', { width: SLIDE_WIDTH, height: SLIDE_HEIGHT, fill: 'white' }))
   const hole = svgElement('circle', { r: 104, fill: 'black' })
@@ -112,10 +126,9 @@ export function createOverlay({ host, onAction = () => {} }) {
     } else if (state.tool === 'hand') {
       pointerLayer.append(svgElement('path', { d: 'M10 20V3C10-1 16-1 16 3V16V7C16 3 22 3 22 7V18V10C22 6 28 6 28 10V21V15C28 11 34 12 34 16V28C34 39 29 44 21 44H17C12 44 8 41 5 35L-1 24C-3 20 1 17 4 20L10 26Z', transform: 'translate(-14 -4)', fill: '#fff', stroke: '#172033', 'stroke-width': 1.8, 'stroke-linejoin': 'round' }))
     } else if (state.tool === 'laser') {
-      circle({ r: 22, fill: state.color, 'fill-opacity': '.08' })
-      circle({ r: 14, fill: state.color, 'fill-opacity': '.18' })
-      circle({ r: 6, fill: state.color, stroke: '#fff', 'stroke-width': 1.5 })
-      circle({ r: 2, fill: '#fff', 'fill-opacity': '.9' })
+      for (const stop of laserColorStops) stop.setAttribute('stop-color', state.color)
+      circle({ r: 24, fill: laserGlow })
+      circle({ r: 7, fill: laserCore })
     } else if (state.tool === 'spotlight') {
       circle({ r: 104, fill: 'none', stroke: '#fff', 'stroke-opacity': '.25', 'stroke-width': 1.5 })
     } else {
