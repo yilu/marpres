@@ -483,7 +483,7 @@ const layoutEngine = marpitPlugin((md) => {
         const classes = [`layout-${block}`]
         const styles = []
 
-        if (token.nesting === 1 && block === 'caption') {
+        if (token.nesting === 1 && (block === 'caption' || block === 'top' || block === 'bottom')) {
           const align = getContainerArgs(token.info, block).find((value) => ALIGNMENTS.has(value))
           if (align) classes.push(`align-${align}`)
         }

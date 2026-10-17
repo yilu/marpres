@@ -201,6 +201,21 @@ section .layout-bottom ol {
   margin: 0;
 }
 
+section .layout-top.align-left,
+section .layout-bottom.align-left {
+  text-align: left;
+}
+
+section .layout-top.align-center,
+section .layout-bottom.align-center {
+  text-align: center;
+}
+
+section .layout-top.align-right,
+section .layout-bottom.align-right {
+  text-align: right;
+}
+
 section .layout-body {
   position: relative;
   flex: 1 1 auto;
@@ -222,7 +237,7 @@ section[data-layout="cols"] .layout-body {
   grid-template-columns: var(--layout-cols, 1fr 1fr);
   grid-template-rows: auto auto auto;
   gap: 6px 24px;
-  align-content: start;
+  align-content: var(--layout-valign, start);
 }
 
 section[data-layout="cols"] .layout-col:has(> p img),

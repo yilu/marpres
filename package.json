@@ -1,17 +1,44 @@
 {
-  "name": "nju-unofficial-marp",
+  "name": "marpres",
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node editor/server.mjs",
+    "dev:gui": "npm run dev",
+    "build": "node scripts/build.mjs",
     "test": "node --test ./test/*.test.mjs",
-    "html": "marp --config-file ./marp.config.mjs --html --output ./dist/demo.html ./slides/demo.md",
-    "pdf": "marp --config-file ./marp.config.mjs --pdf --output ./dist/demo.pdf ./slides/demo.md",
-    "watch": "marp --config-file ./marp.config.mjs --watch --html --output ./dist/demo.html ./slides/demo.md"
+    "test:browser": "node test/browser/run.mjs",
+    "test:gui": "node test/gui-browser.mjs",
+    "test:export": "node test/authoring-export-browser.mjs",
+    "test:design": "node test/design-browser.mjs",
+    "test:shapes": "node test/shapes-browser.mjs",
+    "test:media": "node test/media-export-browser.mjs",
+    "test:arrangement": "node test/arrangement-browser.mjs",
+    "test:theme-preview": "node test/theme-preview-browser.mjs",
+    "legacy:html": "marp --config-file ./marp.config.mjs --html --output ./dist/legacy-demo.html ./test/fixtures/legacy-demo.md",
+    "legacy:pdf": "marp --config-file ./marp.config.mjs --pdf --output ./dist/legacy-demo.pdf ./test/fixtures/legacy-demo.md",
+    "test:titles": "node test/title-browser.mjs",
+    "test:print": "node test/print-browser.mjs"
   },
   "devDependencies": {
-    "@marp-team/marp-cli": "^4.0.0",
-    "@marp-team/marp-core": "^4.0.0",
-    "@marp-team/marpit": "^4.0.0",
-    "markdown-it-container": "^4.0.0"
+    "@marp-team/marp-cli": "4.3.1",
+    "@marp-team/marp-core": "4.3.0",
+    "@marp-team/marpit": "3.2.1",
+    "image-size": "2.0.4",
+    "markdown-it": "14.3.3",
+    "markdown-it-container": "4.0.0",
+    "moveable": "0.53.0",
+    "playwright-chromium": "1.64.0",
+    "postcss": "8.5.30"
+  },
+  "version": "0.1.0",
+  "description": "Markdown slides, visually refined. A local visual editor and layout engine built on Marp.",
+  "engines": {
+    "node": ">=20"
+  },
+  "overrides": {
+    "speech-rule-engine": {
+      "@xmldom/xmldom": "0.9.12"
+    }
   }
 }

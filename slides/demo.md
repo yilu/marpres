@@ -1,494 +1,494 @@
 ---
 marp: true
-theme: nju-unofficial
+theme: marpres
 paginate: true
 math: mathjax
 ---
 
-<!-- _class: title-slide -->
+<!-- _layout: cols 5 4 -->
 
-# NJU Unofficial Template
+# Marpres
+## A source you can read. A canvas you can shape.
 
-![w:110](./figures/logo.svg)
+:::: panel id=cover-message-panel align=left valign=center
+::: box id=cover-headline font=48
+Build the story.
 
-Minimal academic slides for Marp
+Fine-tune the slide.
+:::
 
-Self-documenting demo deck
+::: box id=cover-description
+Write Markdown, shape the layout, then present or export.
+:::
+::::
 
-PDF-first and intentionally unofficial
+:::: panel id=cover-art-panel valign=center
+::: figure id=cover-art
+![](figures/demo-cards.svg)
+:::
+::::
+
+::: figure id=cover-brand position=absolute dx=1142 dy=20 width=98
+![](../assets/brand/marpres-mark.svg)
+:::
 
 ::: footer
-April 25, 2026 --- Nanjing, China
+A hands-on tour · 12 slides · one Markdown source
 :::
 
 ---
 
-# What this theme gives you
-
-- One layout directive per slide: `single`, `cols`, or `grid`.
-- Structured containers: `col`, `caption`, `ref`, `top`, `bottom`, `footer`.
-- Compact math via MathJax, clean code blocks, and a quiet color palette.
-- PDF-first output with no build dependencies beyond Node.js and Marp CLI.
-
-::: footer
-Start from this file, then delete the example slides you do not need.
-:::
-
----
-
-# Quick-start syntax
-
-Use one layout directive, then compose the slide from `col`, `caption`, `ref`, `top`, `bottom`, and `footer`.
-
-```markdown
 <!-- _layout: cols 1 1 -->
 
-# Two-panel figure
+# One deck. Two ways to work.
 
-::: col
-![](./figures/wide-a.png)
-
-::: caption
-Left message.
+:::: panel id=workflow-source-panel align=left valign=center
+::: box id=workflow-source-heading font=32
+**Write the structure**
 :::
 
-::: ref
-Left ref.
+::: box id=workflow-source-example font=25
+```markdown
+::: figure id=progress
+![](figures/demo-signal.svg)
 :::
 
-:::
-
-::: col
-![](./figures/tall-a.png)
-:::
-
-::: footer
-Slide-level note.
+::: caption id=message
+A little clearer, every iteration.
 :::
 ```
+:::
+
+::: box id=workflow-source-note font=23
+Readable text. Local images. Stable object IDs.
+:::
+::::
+
+:::: panel id=workflow-canvas-panel valign=center
+::: figure id=workflow-chart
+![](figures/demo-signal.svg)
+:::
+
+::: caption id=workflow-caption
+A little clearer, every iteration.
+:::
+
+::: ref id=workflow-reference
+Select, resize, crop, and format on the canvas.
+:::
+::::
 
 ::: footer
-Supported directives: `single`, `cols ...`, and `grid RxC`.
+Try it · Select the chart, then use Show source to find its Markdown.
 :::
 
 ---
 
-<!-- _layout: single -->
+<!-- _layout: cols 5 3 -->
 
-# Single layout example
+# Give each element room to breathe
 
-::: col
-![](./figures/wide-a.png)
-
-::: caption
-`single` centers one panel and keeps the main message directly under it.
+:::: panel id=weighted-figure-panel valign=center
+::: figure id=weighted-chart
+![](figures/demo-signal.svg)
 :::
 
-::: ref
-Good default for one key figure, one claim, and one short source line.
+::: caption id=weighted-caption
+A clearer signal across five iterations.
 :::
+
+::: ref id=weighted-reference
+Illustrative data · original SVG · independently editable source line
 :::
+::::
+
+:::: panel id=weighted-message-panel align=left valign=center
+::: box id=weighted-heading font=38
+Figure.
+
+Caption.
+
+Reference.
+:::
+
+::: box id=weighted-description font=24
+Three objects, each with its own position and style.
+
+This slide uses weighted columns: **5 : 3**.
+:::
+::::
 
 ::: footer
-Syntax: `<!-- _layout: single -->`
+Try it · Select each object separately. Shift-click to align a group.
+:::
+
+---
+
+<!-- _layout: grid 2x3 1 1 1 / 1 1 -->
+
+# Arrange a story in a grid
+
+:::: panel id=grid-overview-panel row=1-2 col=1-2 valign=center
+::: figure id=grid-overview
+![](figures/demo-map.svg)
+:::
+
+::: caption id=grid-caption
+One panel spans two rows and two columns.
+:::
+::::
+
+:::: panel id=grid-rows-panel row=1 col=3 align=left valign=center
+::: box id=grid-rows-number font=70 color=#2563eb
+02
+:::
+::: box id=grid-rows-copy font=25
+**Rows**
+
+A large overview beside two smaller ideas.
+:::
+::::
+
+:::: panel id=grid-columns-panel row=2 col=3 align=left valign=center
+::: box id=grid-columns-number font=70 color=#0d9488
+03
+:::
+::: box id=grid-columns-copy font=25
+**Columns**
+
+Use `row=1-2 col=1-2` for the spanning panel.
+:::
+::::
+
+::: footer
+Try it · Turn on full-slide Guides and Snap to refine spacing and alignment.
+:::
+
+---
+
+<!-- _layout: cols 1 1 -->
+
+# Focus the image. Keep the original.
+
+:::: panel id=crop-original-panel valign=top
+::: figure id=crop-original width=500
+![](figures/demo-map.svg)
+:::
+
+::: caption id=crop-original-caption
+Original · the complete route
+:::
+
+::: ref id=crop-original-reference
+The SVG file stays unchanged.
+:::
+::::
+
+:::: panel id=crop-detail-panel valign=top
+::: figure id=crop-detail width=500 crop=42,18,50,64
+![](figures/demo-map.svg)
+:::
+
+::: caption id=crop-detail-caption
+Detail · a different visible frame
+:::
+
+::: ref id=crop-detail-reference
+Crop, resize, and align the frame you can see.
+:::
+::::
+
+::: footer
+Try it · Double-click either image to crop. Enter applies; Escape cancels.
 :::
 
 ---
 
 <!-- _layout: cols 1 1 -->
 
-# Two-column example
+# Choose where new content belongs
 
-::: col
-![](./figures/wide-a.png)
-
-::: caption
-Use the left panel for setup or comparison A.
+:::: panel id=insertion-flow-panel align=left
+::: box id=insertion-flow-heading font=34
+**Inside a panel**
 :::
 
-::: ref
-Per-panel refs can stay attached to the panel.
-:::
-:::
+::: box id=insertion-flow-description
+This text follows the column layout.
 
-::: col
-![](./figures/square-a.png)
+Choose **Insert into → Panel 1** to add text or an image here.
 
-::: caption
-Use the right panel for comparison B.
+The new content inherits the panel’s space and alignment.
 :::
+::::
 
-::: ref
-The bottom footer remains shared across the whole slide.
-:::
+:::: panel id=insertion-free-panel align=left
+::: box id=insertion-free-heading font=34
+**Free on slide**
 :::
 
-::: footer
-Syntax: `<!-- _layout: cols 1 1 -->`
+::: box id=insertion-free-description
+Choose **Free on slide** for a label, annotation, or callout.
+
+Move it anywhere on the canvas.
+:::
+::::
+
+::: shape id=insertion-callout-frame shape=rounded-rect dx=700 dy=375 width=470 height=155 fill=#eff6ff stroke=#93b5ee stroke_width=2 layer=-1
 :::
 
----
+::: box id=insertion-callout position=absolute dx=730 dy=412 width=410 font=30 align=center color=#1e3a8a
+An independent callout,
 
-<!-- _layout: cols 5 4 -->
-<!-- _valign: start -->
-
-# Figure and text in one row
-
-::: col
-![](./figures/wide-b.png)
-
-::: caption
-Left: the main panel.
-:::
-
-::: ref
-Per-panel ref stays attached to the panel.
-:::
-
-:::
-
-::: col
-- The opposite column can be normal Markdown text.
-- Bullets stay at the same base size as a normal text slide.
-- This is the common "figure plus discussion" pattern.
-
+right where you need it.
 :::
 
 ::: footer
-Syntax: `<!-- _layout: cols 5 4 -->` with `<!-- _valign: start -->`.
-:::
-
----
-
-<!-- _layout: cols 4 5 -->
-
-# Top and bottom around columns
-
-::: top
-Top text can introduce the slide before the columns.
-:::
-
-::: col
-- Text can stay on the left.
-- Reading order remains simple.
-- This works for setup bullets.
-
-:::
-
-::: col
-![](./figures/tall-a.png)
-
-::: caption
-Right: a panel with a caption.
-:::
-
-:::
-
-::: bottom
-Bottom text can summarize the slide after the columns.
-:::
-
-::: footer
-Supports `top` above the body and `bottom` below it.
+Try it · Change Insert into explicitly. Selecting an object does not change that choice.
 :::
 
 ---
 
 <!-- _layout: cols 1 1 -->
-<!-- _caption_align: right -->
 
-# Caption alignment control
+# Keep structure in Markdown
 
-::: col
-![](./figures/square-a.png)
+:::: panel id=markdown-text-panel align=left valign=center
+::: box id=markdown-text
+## Words with structure
 
-::: caption
-This caption follows the slide default and aligns right.
+- **Emphasis** for the main idea
+- *A softer voice* for supporting detail
+- `Inline code` for precise terms
+
+```js
+const story = ["idea", "evidence", "point"]
+story.forEach(present)
+```
+:::
+::::
+
+:::: panel id=markdown-math-panel valign=center
+::: box id=markdown-math-heading font=32 align=center
+**Equations that stay readable**
 :::
 
+::: box id=markdown-equations
+$$
+\mathbf y = X\mathbf w + \mathbf b
+$$
+
+$$
+X = \begin{pmatrix}
+1 & 2 \\
+3 & 4
+\end{pmatrix}
+$$
 :::
 
-::: col
-![](./figures/square-b.png)
+::: box id=markdown-math-note font=23 align=center
+Inline math works too: $y = wx + b$.
+:::
+::::
 
-::: caption left
-This caption overrides the slide default and aligns left.
+::: footer
+Try it · Double-click a text object to edit. Use the formatting bar for local styling.
 :::
 
+---
+
+# Build diagrams from editable parts
+
+::: box id=diagram-introduction font=27
+A simple process, made from separate shapes, arrows, and labels.
+:::
+
+::: shape id=diagram-draft-card shape=rounded-rect dx=100 dy=245 width=280 height=150 fill=#eff6ff stroke=#93b5ee stroke_width=2
+:::
+::: shape id=diagram-refine-card shape=rounded-rect dx=500 dy=245 width=280 height=150 fill=#e6f6f1 stroke=#86c8b5 stroke_width=2
+:::
+::: shape id=diagram-present-card shape=rounded-rect dx=900 dy=245 width=280 height=150 fill=#fff5e8 stroke=#efc18b stroke_width=2
+:::
+::: shape id=diagram-first-arrow shape=arrow dx=401 dy=304 width=78 height=30 stroke=#64748b stroke_width=4
+:::
+::: shape id=diagram-second-arrow shape=arrow dx=801 dy=304 width=78 height=30 stroke=#64748b stroke_width=4
+:::
+
+::: box id=diagram-draft-label position=absolute dx=130 dy=286 width=220 font=32 align=center color=#1e3a8a
+**Draft**
+:::
+::: box id=diagram-refine-label position=absolute dx=530 dy=286 width=220 font=32 align=center color=#065f46
+**Refine**
+:::
+::: box id=diagram-present-label position=absolute dx=930 dy=286 width=220 font=32 align=center color=#92400e
+**Present**
+:::
+
+::: box id=diagram-description position=absolute dx=180 dy=470 width=920 font=27 align=center
+Select several objects to align or distribute them.
+
+Adjust fill, stroke, rotation, and layer independently.
 :::
 
 ::: footer
-Use `::: caption left` or `::: caption right`; slide default: `<!-- _caption_align: ... -->`.
+Try it · Insert a shape from the gallery, then connect it with an arrow.
 :::
 
 ---
 
 <!-- _layout: cols 1 1 1 -->
 
-# Three-column example
+# Reveal the story, one step at a time
 
-::: col
-![](./figures/square-a.png)
-
-::: caption
-Three equal columns work well for compact comparisons.
+:::: panel id=reveal-context-panel stage=0 align=left valign=center
+::: box id=reveal-context-number font=76 color=#2563eb
+01
 :::
+::: box id=reveal-context-copy
+## Set the context
 
+Start with one clear question.
 :::
+::::
 
-::: col
-![](./figures/square-b.png)
-
-::: caption
-Keep each message to one short line.
+:::: panel id=reveal-evidence-panel stage=1 align=left valign=center
+::: box id=reveal-evidence-number font=76 color=#0d9488
+02
 :::
+::: box id=reveal-evidence-copy
+## Show the evidence
 
+Show the key evidence.
 :::
+::::
 
-::: col
-![](./figures/square-a.png)
-
-::: caption
-`cols` accepts any positive numeric sequence.
+:::: panel id=reveal-point-panel stage=2 align=left valign=center
+::: box id=reveal-point-number font=76 color=#d97706
+03
 :::
+::: box id=reveal-point-copy
+## Land the point
 
+Leave one idea to remember.
 :::
+::::
 
 ::: footer
-Syntax: `<!-- _layout: cols 1 1 1 -->`
+Try it · Play, then press Space or →. Each cumulative stage becomes a PDF page.
 :::
 
 ---
 
-<!-- _layout: grid 2x2 -->
+<!-- _appearance: dark -->
+<!-- _layout: cols 4 5 -->
 
-# 2x2 grid example
+# Set the mood with light and dark
 
-::: col
-![](./figures/square-a.png)
+:::: panel id=dark-message-panel align=left valign=center
+::: box id=dark-headline font=40
+A different mood.
 
-::: caption
-Panel 1
+The same story.
 :::
 
+::: box id=dark-description font=25
+Use the slide’s Appearance control, or change the deck default in Theme.
+
+Text, surfaces, and accents adapt together.
+:::
+::::
+
+:::: panel id=dark-figure-panel valign=center
+::: figure id=dark-figure
+![](figures/demo-signal.svg)
 :::
 
-::: col
-![](./figures/square-b.png)
-
-::: caption
-Panel 2
+::: caption id=dark-caption
+Figure colours stay untouched.
 :::
 
+::: ref id=dark-reference
+This slide uses `_appearance: dark`.
 :::
-
-::: col
-![](./figures/square-a.png)
-
-::: caption
-Panel 3
-:::
-
-:::
-
-::: col
-![](./figures/square-b.png)
-
-::: caption
-Panel 4
-:::
-
-:::
+::::
 
 ::: footer
-Syntax: `<!-- _layout: grid 2x2 -->`
-:::
-
----
-
-<!-- _layout: grid 2x3 -->
-
-# Grid spanning: merged rectangle
-
-::: col 1-2,1-2
-![](./figures/wide-b.png)
-
-::: caption
-Spanning rows 1–2, cols 1–2
-:::
-
-:::
-
-::: col 1,3
-![](./figures/square-a.png)
-
-::: caption
-Row 1, col 3
-:::
-
-:::
-
-::: col 2,3
-![](./figures/square-b.png)
-
-::: caption
-Row 2, col 3
-:::
-
-:::
-
-::: footer
-Syntax: `::: col 1-2,1-2` places a panel at rows 1–2, cols 1–2.
-:::
-
----
-
-<!-- _layout: grid 2x2 -->
-
-# Grid spanning: tall left panel
-
-::: col 1-2,1
-![](./figures/tall-a.png)
-
-::: caption
-Spans both rows in col 1
-:::
-
-:::
-
-::: col 1,2
-![](./figures/square-a.png)
-
-::: caption
-Top-right cell
-:::
-
-:::
-
-::: col 2,2
-![](./figures/square-b.png)
-
-::: caption
-Bottom-right cell
-:::
-
-:::
-
-::: footer
-Equivalent of the old `merge-left` class, but general and explicit.
+Try it · Compare this slide with the light slides. The artwork remains identical.
 :::
 
 ---
 
 <!-- _layout: cols 1 1 -->
 
-# Shared caption and reference below columns
+# Give the deck one visual voice
 
-::: col
-![](./figures/tall-b.png)
-
-::: caption
-Panel A
+:::: panel id=theme-preview-panel valign=center
+::: figure id=theme-preview-art
+![](figures/demo-cards.svg)
 :::
 
+::: caption id=theme-preview-caption
+Preview the change on your actual slides.
+:::
+::::
+
+:::: panel id=theme-controls-panel align=left valign=center
+::: box id=theme-controls-heading font=34
+**One shared Theme**
 :::
 
-::: col
-![](./figures/square-b.png)
+::: box id=theme-controls-description font=25
+Set typography and coordinated colours for the whole deck.
 
-::: caption
-Panel B
+Adjust the shared positions of titles, footers, and page numbers.
+
+Preview first. **Apply to deck** when it feels right.
 :::
 
+::: box id=theme-portability font=23
+Save a preset to reuse the design in another deck.
 :::
-
-::: caption
-Top-level `caption` spans the full width below the columns.
-:::
-
-::: ref
-Top-level `ref` also spans the full width and is useful for shared provenance.
-:::
+::::
 
 ::: footer
-`caption`, `ref`, and `footer` have distinct jobs and should not be mixed.
+Try it · Open Theme. Local object overrides stay local; Reset style restores inheritance.
 :::
 
 ---
 
-# Code block styling
+<!-- _layout: cols 5 4 -->
 
-The theme keeps code readable and quiet. The command block below matches the intended author workflow.
+# From source to screen
 
-```sh
-npm install
-npm test
-npm run html
-npm run pdf
-```
+:::: panel id=finish-source-panel align=left valign=center
+::: box id=finish-source-heading font=34
+**Keep your source close**
+:::
+
+::: box id=finish-source-copy
+Use **Show source** to reveal an object’s Markdown.
+
+Click a source line to jump to its slide. Open that location in VS Code when you want to write.
+
+Start your next deck with `slides/starter.md`.
+:::
+::::
+
+:::: panel id=finish-output-panel align=left valign=center
+::: box id=finish-play-heading font=34
+**Play**
+:::
+::: box id=finish-play-copy font=25
+Present from the current slide and reveal stages in order.
+:::
+::: box id=finish-export-heading font=34
+**Export PDF**
+:::
+::: box id=finish-export-copy font=25
+Download a clean 16:9 deck, with one page per cumulative stage.
+:::
+::::
 
 ::: footer
-Run these commands from the template root to build slides.
-:::
-
----
-
-# LaTeX and equations
-
-Enable MathJax in front matter, then mix inline math like $E = mc^2$ with displayed equations:
-
-$$
-\chi(q,\omega) = \frac{\chi_0(q,\omega)}{1 - U \chi_0(q,\omega)}
-$$
-
-$$
-\begin{pmatrix}
-1 & t \\
-t & 1
-\end{pmatrix}
-\qquad
-\begin{aligned}
-F(T) &= E - TS \\
-C_V &= -T \frac{\partial^2 F}{\partial T^2}
-\end{aligned}
-$$
-
-::: footer
-Math snippet: `slides/snippets/latex-example.md`
-:::
-
----
-
-<!-- _layout: cols 1 1 -->
-<!-- _valign: start -->
-
-# Acknowledgements
-
-::: col
-
-**University of Catburg**
-E. Schr&ouml;dinger, F. Whiskers, G. Pawlov
-
-**Institute for Uncertain Sciences**
-W. Heisenberg, U. Blurry, V. Fuzzystate
-
-**Royal College of Antimatter**
-P. Dirac, Q. Spinor, R. Bra-Ket
-
-:::
-
-::: col
-
-**Funding**
-Quantum Cat Foundation
-Ministry of Entangled Affairs
-
-:::
-
-::: bottom
-<div class="big-center">Thank you</div>
-:::
-
-::: footer
-April 25, 2026 --- Nanjing, China
+Marpres · Write the story. Shape the slide. Share the result.
 :::

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="580" viewBox="0 0 960 580">
+  <rect x="1" y="1" width="958" height="578" rx="22" fill="#fff" stroke="#dbe4ee" stroke-width="2"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="66" y="68" font-size="28" font-weight="600" fill="#172033">A little clearer, every iteration</text>
+    <text x="66" y="103" font-size="20" fill="#64748b">Illustrative scores · 0–100 scale</text>
+    <g stroke="#e5eaf1" stroke-width="2"><path d="M100 160H864M100 240H864M100 320H864M100 400H864"/></g>
+    <g fill="#64748b" font-size="20" text-anchor="end"><text x="80" y="167">100</text><text x="80" y="247">75</text><text x="80" y="327">50</text><text x="80" y="407">25</text></g>
+    <path d="M104 383L284 333L464 295L644 222L824 180L824 460H104Z" fill="#eaf2ff"/>
+    <path d="M104 383L284 333L464 295L644 222L824 180" fill="none" stroke="#2563eb" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#fff" stroke="#2563eb" stroke-width="5"><circle cx="104" cy="383" r="9"/><circle cx="284" cy="333" r="9"/><circle cx="464" cy="295" r="9"/><circle cx="644" cy="222" r="9"/><circle cx="824" cy="180" r="9"/></g>
+    <g fill="#475569" font-size="22" text-anchor="middle"><text x="104" y="503">Draft</text><text x="284" y="503">Structure</text><text x="464" y="503">Edit</text><text x="644" y="503">Refine</text><text x="824" y="503">Present</text></g>
+    <rect x="737" y="113" width="99" height="41" rx="20" fill="#d8f3ed"/>
+    <text x="786" y="141" text-anchor="middle" font-size="24" font-weight="600" fill="#087f72">94</text>
+  </g>
+</svg>

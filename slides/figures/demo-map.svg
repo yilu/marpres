@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600">
+  <rect width="960" height="600" rx="22" fill="#f3f6fa"/>
+  <path d="M0 470C170 367 219 490 367 433S610 440 739 366S878 389 960 308V600H0Z" fill="#d7eaff"/>
+  <g fill="#e0e7ef"><rect x="62" y="90" width="140" height="110" rx="10"/><rect x="242" y="90" width="140" height="110" rx="10"/><rect x="422" y="90" width="140" height="110" rx="10"/><rect x="602" y="90" width="140" height="110" rx="10"/><rect x="782" y="90" width="116" height="110" rx="10"/><rect x="62" y="242" width="140" height="116" rx="10"/><rect x="242" y="242" width="140" height="116" rx="10"/><rect x="422" y="242" width="140" height="116" rx="10"/><rect x="782" y="242" width="116" height="86" rx="10"/></g>
+  <rect x="601" y="240" width="142" height="118" rx="13" fill="#c6e8da"/>
+  <g fill="#8fcbb2"><circle cx="632" cy="271" r="13"/><circle cx="676" cy="272" r="17"/><circle cx="716" cy="282" r="11"/><circle cx="645" cy="319" r="16"/><circle cx="701" cy="323" r="16"/></g>
+  <g fill="none" stroke="#fff" stroke-width="18"><path d="M30 220H930M222 65V415M402 65V450M582 65V430M762 65V365"/></g>
+  <path d="M131 303H222V220H582V391H670" fill="none" stroke="#2563eb" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="131" cy="303" r="17" fill="#fff" stroke="#2563eb" stroke-width="8"/>
+  <circle cx="670" cy="391" r="18" fill="#14b8a6" stroke="#fff" stroke-width="6"/>
+  <g font-family="Arial, Helvetica, sans-serif"><text x="62" y="48" font-size="24" font-weight="600" fill="#334155">A route through the idea</text><text x="536" y="540" font-size="22" fill="#57718e">Original vector artwork</text><rect x="618" y="418" width="135" height="38" rx="19" fill="#fff"/><text x="686" y="444" text-anchor="middle" font-size="20" fill="#087f72">The detail</text></g>
+</svg>

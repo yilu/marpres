@@ -1,0 +1,90 @@
+/* @theme marpres */
+@import 'gaia';
+section {
+  --deck-light-background:#ffffff;--deck-light-text:#171417;--deck-light-title:#7a005f;--deck-light-muted:#615863;--deck-light-accent:#7a005f;--deck-light-rule:#e4d9e1;
+  --deck-light-surface:#f6f1f5;--deck-light-surface-alt:#faf7f9;--deck-light-rule-strong:#d6c3d0;--deck-light-title-band:#7a005f;--deck-light-title-on-band:#ffffff;
+  --deck-dark-background:#17141d;--deck-dark-text:#f3eff5;--deck-dark-title:#f0b6dd;--deck-dark-muted:#bbb0c2;--deck-dark-accent:#e79bcf;--deck-dark-rule:#4b3e52;
+  --deck-dark-surface:#28212b;--deck-dark-surface-alt:#1f1924;--deck-dark-rule-strong:#6d536e;--deck-dark-title-band:#e79bcf;--deck-dark-title-on-band:#17141d;
+  --deck-background:var(--deck-light-background);--deck-text:var(--deck-light-text);--deck-title:var(--deck-light-title);--deck-muted:var(--deck-light-muted);--deck-accent:var(--deck-light-accent);--deck-rule:var(--deck-light-rule);
+  --deck-surface:var(--deck-light-surface);--deck-surface-alt:var(--deck-light-surface-alt);--deck-rule-strong:var(--deck-light-rule-strong);--deck-title-band:var(--deck-light-title-band);--deck-title-on-band:var(--deck-light-title-on-band);
+  --panel-gap:24px;
+  box-sizing:border-box;position:relative;display:flex;flex-direction:column;
+  width:1280px;height:720px;padding:24px 32px 18px;background:var(--deck-background);color:var(--deck-text);
+  font-family:var(--deck-font-family,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif);
+  font-size:var(--deck-body-size,26px);line-height:1.25;letter-spacing:-.015em;
+}
+/* Gaia clips semantic headers; title glyphs may extend beyond their line boxes. */
+section .deck-heading {position:static;width:auto;height:auto;padding:0;flex:none;margin:0 0 32px;min-width:0;overflow:visible;}
+section .deck-heading:empty {display:none;}
+section .deck-heading h1 {margin:0;color:var(--deck-title);font-size:var(--deck-title-size,47.84px);font-weight:400;line-height:1.08;letter-spacing:-.03em;}
+section .deck-heading h2 {margin:12px 0 0;font-size:28px;font-weight:400;color:var(--deck-muted);line-height:1.2;}
+section .deck-content {flex:1;min-height:0;display:flex;flex-direction:column;gap:16px;}
+section .deck-footer {position:static;width:auto;height:auto;padding:0;flex:none;min-height:24px;margin-top:12px;padding-right:70px;font-size:var(--deck-footer-size,19px);line-height:1.25;color:var(--deck-muted);}
+section::after {position:absolute;height:auto;bottom:18px;right:32px;color:var(--deck-muted);font-size:var(--deck-page-number-size,19px);line-height:24px;padding:0;display:var(--deck-page-number-display,block);}
+/* Master positions move the visible roles while retaining their layout space. */
+section .deck-heading h1 {translate:var(--deck-title-translate,none);}
+/* Opposite margins preserve the footer footprint and its descendants' containing block. */
+section .deck-footer {margin-top:calc(12px + var(--deck-footer-dy,0px));margin-bottom:calc(-1 * var(--deck-footer-dy,0px));margin-left:var(--deck-footer-dx,0px);margin-right:calc(-1 * var(--deck-footer-dx,0px));}
+section::after {translate:var(--deck-page-number-translate,none);}
+section p,section ul,section ol {margin:0;}
+section ul,section ol {padding-left:1.15em;}
+section li+li {margin-top:.32em;}
+section h2 {font-size:32px;font-weight:500;color:var(--deck-title);margin:0 0 .35em;}
+section strong {font-weight:600;}
+section a {color:var(--deck-accent);}
+section img {display:block;max-width:100%;max-height:100%;object-fit:contain;}
+section table {width:max-content;max-width:100%;margin:12px auto;border-collapse:collapse;font-size:.9em;}
+section th,section td {padding:7px 15px;border:0;border-bottom:1px solid var(--deck-rule);}
+section th {background:var(--deck-surface);}
+section pre {margin:0;max-height:100%;background:var(--deck-surface-alt);color:var(--deck-text);padding:16px;border:1px solid var(--deck-rule);border-radius:6px;}
+section code {background:var(--deck-surface);color:inherit;border-radius:4px;padding:.06em .2em;}
+section pre code {font-size:.74em;background:none;}
+section mjx-container[display="true"] {margin:.25em 0!important;}
+section .panel-grid {flex:1;min-height:0;display:grid;column-gap:var(--panel-gap);row-gap:var(--panel-gap);}
+section .panel {display:grid;min-width:0;min-height:0;grid-template-rows:minmax(0,1fr) auto auto;row-gap:0;}
+section .comparison-grid {grid-template-rows:minmax(0,1fr) auto auto;row-gap:0;}
+section .comparison-grid>.panel {grid-row:1 / 4!important;grid-template-rows:subgrid;}
+section .panel-body {grid-row:1;display:flex;flex-direction:column;justify-content:var(--panel-valign,flex-start);min-height:0;min-width:0;gap:16px;}
+section .panel-caption:empty,section .panel-ref:empty {display:none;}
+section .panel-caption {grid-row:2;padding-top:8px;min-width:0;font-size:var(--deck-caption-size,25px);line-height:1.22;text-align:var(--caption-align,center);}
+section .panel-ref {grid-row:3;padding-top:8px;min-width:0;font-size:var(--deck-reference-size,18px);line-height:1.22;color:var(--deck-muted);text-align:left;}
+section .layout-box {min-width:0;flex:none;}
+section .layout-box>*+* {margin-top:.5em;}
+section .layout-caption,section .layout-ref {position:relative;}
+section .layout-caption {font-size:var(--deck-caption-size,inherit);}
+section .layout-ref {font-size:var(--deck-reference-size,inherit);color:var(--deck-reference-color,inherit);}
+section .layout-caption>p+p,section .layout-ref>p+p {margin-top:.2em;}
+section .layout-top,section .layout-bottom {flex:none;}
+section .image-line {flex:1;min-height:0;display:flex;align-items:var(--panel-valign,center);justify-content:var(--panel-align,center);}
+section .image-line>img {object-fit:contain;min-height:0;}
+section .figure-slot {flex:1;min-height:0;min-width:0;container-type:size;display:flex;justify-content:var(--panel-align,center);align-items:var(--panel-valign,center);}
+section .figure-frame {position:relative;overflow:hidden;flex:none;width:min(100cqw,calc(100cqh * var(--crop-ratio)));height:auto;aspect-ratio:var(--crop-ratio);}
+section .figure-frame>img {position:absolute;display:block;max-width:none;max-height:none;object-fit:fill;pointer-events:none;}
+section .editable-object {position:relative;transform-origin:top left;}
+section .shape-frame {position:absolute;left:0;top:0;z-index:1;transform-origin:center center;line-height:0;}
+section .shape-frame>svg {display:block;overflow:visible;pointer-events:none;}
+section .stage-hidden,section .stage-hidden * {visibility:hidden!important;pointer-events:none!important;}
+section.title-slide .deck-heading {position:absolute;top:188px;left:0;right:0;min-height:172px;display:flex;align-items:center;justify-content:center;padding:20px 60px;background:var(--deck-title-band);}
+section.title-slide .deck-heading h1 {color:var(--deck-title-on-band);text-align:center;font-size:var(--deck-cover-title-size,49px);line-height:1.3;}
+section.title-slide .deck-content {margin-top:438px;align-items:center;gap:15px;}
+section.title-slide .deck-content>.image-line {position:absolute;top:18px;right:24px;width:110px;height:110px;}
+section.title-slide .deck-footer {text-align:center;padding:0;}
+@media print {section .draft-guides {display:none!important;}}
+
+section table thead th {background:var(--deck-surface);color:var(--deck-text);border-bottom:2px solid var(--deck-rule-strong);}
+section table tbody tr {background:var(--deck-background);}
+section table tbody tr:nth-child(even) {background:var(--deck-surface-alt);}
+section table td, section table th {border:0;border-bottom:1px solid var(--deck-rule);}
+
+/* Compact an entire panel group, including captions and references. */
+section .panel[data-pack] {grid-template-rows:auto auto auto;align-self:center;}
+section .panel[data-pack="top"] {align-self:start;}
+section .panel[data-pack="bottom"] {align-self:end;}
+section .panel[data-pack] .figure-slot {container-type:inline-size;flex:none;}
+section .panel[data-pack] .figure-frame {width:100%;}
+/* A nested figure takes normal flow height inside an explicitly editable box. */
+section .layout-box .figure-slot {container-type:inline-size;flex:none;}
+section .layout-box .figure-frame {width:100%;}
+
+section .shape-frame {z-index:1;}
+section [data-position="absolute"] {z-index:2;}

@@ -1,0 +1,6 @@
+/* @theme nju-unofficial-v2 */
+/* Compatibility for existing v2 decks. New decks should use theme: marpres. */
+@import 'marpres';
+
+/* Deprecated colour variable retained for custom styles in existing decks. */
+section { --nju-purple:var(--deck-accent); }

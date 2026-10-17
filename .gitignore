@@ -1,3 +1,15 @@
 node_modules/
-dist/*.html
+dist/
 .DS_Store
+
+# Local development sessions retained outside the published package.
+/draft/
+/slides/authoring-playground.md
+/slides/crop-playground.md
+/slides/huaian-v2.md
+/slides/figures/p1_chen_tetragonal.png
+/slides/figures/p1_feng_stripe.png
+/slides/figures/p1_wang_anneal.png
+/slides/figures/p2_delta_PD.png
+/slides/figures/p2_bands.png
+/slides/figures/p2_oxygen_defects.png

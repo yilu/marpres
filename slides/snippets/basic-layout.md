@@ -1,39 +1,35 @@
 ---
 marp: true
-theme: nju-unofficial
+theme: marpres
 paginate: false
 ---
 
-<!-- _layout: cols 1 1 -->
+<!-- _layout: cols 5 4 -->
 
-# Basic layout snippet
+# A figure and its message
 
-::: col
-![](../figures/wide-a.png)
-
-::: caption
-Left-panel message.
+:::: panel id=snippet-figure-panel
+::: figure id=snippet-figure
+![](../figures/demo-signal.svg)
 :::
 
-::: ref
-Optional left-panel reference.
+::: caption id=snippet-caption
+A clearer signal with each iteration.
 :::
 
+::: ref id=snippet-reference
+Illustrative data · original SVG
 :::
+::::
 
-::: col
-![](../figures/square-a.png)
+:::: panel id=snippet-text-panel align=left valign=center
+::: box id=snippet-message
+## Make the point
 
-::: caption
-Right-panel message.
+The figure, caption, reference, and this text are separate editable objects.
 :::
-
-::: ref
-Optional right-panel reference.
-:::
-
-:::
+::::
 
 ::: footer
-Slide-level footer note, citation, or DOI.
+Select an object in Marpres, or edit its Markdown directly.
 :::

@@ -1,155 +1,117 @@
-# nju-unofficial-marp
+# Marpres
 
-A minimal Marp slide template for academic talks, with an NJU-inspired look.
-Markdown-first authoring, one layout directive per slide, PDF-first output.
+<img src="assets/brand/marpres-wordmark.svg" alt="Marpres" width="360">
 
-> **Not an official Nanjing University template.** Inspired by NJU aesthetics, but independent and unofficial.
+**Write slides in Markdown. Refine them visually.**
 
-**[Preview the demo deck (PDF)](dist/demo.pdf)**
+Marpres is an independent presentation tool built on [Marp](https://marp.app/). Use Markdown for the narrative, equations, figures, and reusable layouts; use the local browser editor for placement, cropping, typography, and diagrams. Both work on the same Markdown file.
 
-## Quick start
+## Quickstart
 
-```bash
-npm install
-npm run pdf      # renders slides/demo.md → dist/demo.pdf
-npm run html     # renders slides/demo.md → dist/demo.html
-npm test         # runs layout-engine tests
+Install **Node.js 20 or later** and **Google Chrome**, then:
+
+```sh
+git clone https://github.com/yilu/marpres.git
+cd marpres
+npm ci
+npm run dev
 ```
 
-Requires Node.js. Marp CLI is installed as a dev dependency.
+Open **http://127.0.0.1:3030**. The editor opens [the demo](slides/demo.md), which demonstrates the layouts and editing features. Edits are saved directly to that file.
 
-## Create your own talk
+To start your own presentation:
 
-### Option A: Work inside the repo
-
-1. Copy `slides/demo.md` to a new file (e.g. `slides/my-talk.md`).
-2. Keep the front matter and `theme: nju-unofficial`.
-3. Replace placeholder images under `slides/figures/` with your own.
-4. Update the build commands in `package.json` to point to your file.
-
-### Option B: Work in a separate directory (recommended)
-
-Keep the template repo untouched and create your talk alongside it:
-
-```
-parent/
-├── nju-unofficial-marp/   # cloned template (don't edit)
-└── my-talk/
-    ├── marp.config.mjs    # points to the template
-    ├── slides.md           # your talk
-    └── figures/            # your figures
+```sh
+cp slides/starter.md slides/my-talk.md
+npm run dev -- slides/my-talk.md --port 3031
 ```
 
-Create `marp.config.mjs` in your talk directory:
+Open **http://127.0.0.1:3031**. Keep the terminal running; press Ctrl+C to stop the editor. If Chrome is installed at a different location, set `CHROME_PATH` to its executable before exporting or running browser tests:
 
-```js
-import layoutEngine from '../nju-unofficial-marp/engine/layout-engine.mjs'
-
-export default {
-  allowLocalFiles: true,
-  html: true,
-  themeSet: '../nju-unofficial-marp/themes',
-  engine: ({ marp }) => marp.use(layoutEngine)
-}
+```sh
+CHROME_PATH=/path/to/chrome npm run build
 ```
 
-Then build with:
+## From Markdown to finished slides
 
-```bash
-npx @marp-team/marp-cli --config-file ./marp.config.mjs --pdf slides.md
-npx @marp-team/marp-cli --config-file ./marp.config.mjs --html slides.md
+1. **Write the content.** Start with `theme: marpres`. Put selectable text in `::: box id=...` blocks and images in `::: figure id=...` blocks. Give every editable object a unique ID across the deck.
+2. **Arrange it visually.** Select and drag objects, resize with handles, and double-click a figure to crop. Double-click text to edit it in the inspector; **Apply text** saves the draft.
+3. **Set a shared style.** Open **Theme** to preview fonts, light/dark palettes, CSS, and title/footer/page-number positions on actual slides. **Apply to deck** saves one undoable change. Presets let you reuse these settings in another deck.
+4. **Rehearse and export.** **Play** starts from the current slide and advances through its reveal stages. Escape returns to editing. **Export PDF** downloads the presentation.
+
+The [authoring guide](docs/authoring.md) covers syntax, shortcuts, and the complete workflow. The [starter deck](slides/starter.md) is a small starting point; the [demo](slides/demo.md) shows the features together.
+
+### Layout and precise arrangement
+
+**Insert into** defaults to **Free on slide**. Choose an existing panel to insert text or an image into its automatic layout. Selecting an object does not change that choice; changing slides resets it. Shapes remain free annotations.
+
+Shift-click objects, or drag on empty canvas, to select several. **Arrange → Align to** chooses the bounds used by the six alignment commands:
+
+| Target | Bounds |
+| --- | --- |
+| Selected objects | The combined bounds of two or more selected objects |
+| Containing panel | The full shared panel, including its caption and reference tracks |
+| Content area | The slide's main content region |
+| Slide | The complete 1280 × 720 canvas |
+
+**Distribute** needs at least three objects. **Equal gaps** spaces their visible edges evenly; **Equal centres** spaces their centres evenly. Both preserve the first and last objects. Alignment and distribution apply once, and each group action has one undo step.
+
+Figure alignment uses the visible cropped frame. Double-click a figure to drag its crop edges or pan the image inside the crop; Enter applies and Escape cancels. The source image stays intact. **Fit** and **25–200%** zoom change the view; hold Space and drag to pan.
+
+### Source, text, and history
+
+The horizontal toolbar formats whole text blocks. The text editor has separate buttons for formatting selected words. Math and Markdown remain in the source. Text drafts survive selection changes; Play and PDF export save valid drafts first and stop for unresolved conflicts.
+
+**Show source** highlights the selected object's Markdown in a read-only pane. Click a source line to select its object, or use **Open in VS Code** to open that file location. Save external Markdown edits, then use **Reload source** when the editor detects the change.
+
+Undo/redo belongs to the running editor server and survives a browser refresh. It resets when the server restarts or the source changes externally. Use Git for durable project history.
+
+## Build HTML and PDF
+
+```sh
+npm run build
+npm run build -- slides/my-talk.md
 ```
 
-## Layout directives
+The first command writes `dist/demo.html` and `dist/demo.pdf`; the second writes `dist/my-talk.html` and `dist/my-talk.pdf`. Exports use the presentation renderer without editing guides or selection handles.
 
-Each slide gets one layout directive as an HTML comment:
+Reveals are cumulative: stage 0 appears first, followed by each used positive stage. PDF contains one page per stage; exported HTML provides stage navigation. Slides without reveals export as one page each. The [authoring guide](docs/authoring.md#reveal-stages-and-playback) explains the details.
 
-| Directive | Effect |
-|-----------|--------|
-| `<!-- _layout: single -->` | One centered panel |
-| `<!-- _layout: cols 1 1 -->` | Two equal columns |
-| `<!-- _layout: cols 5 4 -->` | Two columns, custom ratio |
-| `<!-- _layout: cols 1 1 1 -->` | Three columns |
-| `<!-- _layout: grid 2x2 -->` | 2-row, 2-column grid |
-| `<!-- _layout: grid 2x3 -->` | 2-row, 3-column grid |
+## Scope and compatibility
 
-`cols` accepts any positive numeric sequence. `grid` accepts `ROWSxCOLS`.
+Marpres currently provides a local, single-user editor and 16:9 HTML/PDF output. Editable PowerPoint/Keynote export, attached diagram connectors, and automatic collision avoidance are not implemented. Remote images can display in Markdown; crop figures require local image files.
 
-### Grid cell spanning
+Single-window Play is available. Dual-screen presenter view, notes, pointers, and whiteboard tools are [planned separately](docs/roadmap.md).
 
-In `grid` layouts, a col can span multiple rows and/or columns:
-
-```markdown
-::: col 1-2,1-2
-Panel spanning rows 1–2, cols 1–2
-:::
-```
-
-Format: `::: col ROW_RANGE,COL_RANGE` where each range is `START-END` (multi-cell) or `START` (single cell).
-
-| Syntax | Meaning |
-|--------|---------|
-| `::: col 1-2,1-2` | Rows 1–2, cols 1–2 |
-| `::: col 1,3` | Row 1, col 3 |
-| `::: col 1-3,1` | Rows 1–3, col 1 |
-
-Cols without a span argument auto-place as before.
-
-## Containers
-
-Inside a layout slide, use fenced containers:
-
-| Container | Purpose |
-|-----------|---------|
-| `::: col` | One panel (figure, text, or code) |
-| `::: caption` | Short message under a panel or spanning all columns |
-| `::: ref` | Source or provenance line |
-| `::: top` | Text above the column body |
-| `::: bottom` | Text below the column body |
-| `::: footer` | Slide-level footer at the bottom edge |
-
-Caption alignment: `::: caption left`, `::: caption center`, `::: caption right`, or set a slide default with `<!-- _caption_align: right -->`.
-
-Vertical alignment of figures in `cols`: `<!-- _valign: start -->` (top), `center` (default), or `end` (bottom).
-
-## Utility classes
-
-Use `<div class="big-center">Thank you</div>` for a large centered line (e.g. on an acknowledgements slide). Requires `html: true` in `marp.config.mjs`.
-
-## Math
-
-Enable MathJax in front matter:
-
-```yaml
-math: mathjax
-```
-
-Then use `$...$` for inline and `$$...$$` for display math. See `slides/snippets/latex-example.md` for examples.
-
-## Logo
-
-The title slide uses a normal Markdown image for the logo:
-
-```markdown
-![w:110](./figures/logo.svg)
-```
-
-Replace `slides/figures/logo.svg` with your own, or change the image path.
+Existing decks have a retained legacy rendering path. See [compatibility and migration](docs/compatibility.md) before moving a deck between renderers.
 
 ## Project structure
 
-```
-├── themes/nju-unofficial.css    # theme stylesheet
-├── engine/layout-engine.mjs     # Marpit layout plugin
-├── marp.config.mjs              # Marp CLI configuration
-├── slides/
-│   ├── demo.md                  # self-documenting demo deck
-│   ├── figures/                 # placeholder images and logo
-│   └── snippets/                # copy-paste layout and math examples
-├── test/                        # layout-engine tests
-└── dist/demo.pdf                # pre-built demo PDF
+| Path | Purpose |
+| --- | --- |
+| `slides/demo.md`, `slides/starter.md` | Feature showcase and a small starting deck |
+| `editor/server.mjs` | Local editor server |
+| `editor/source-store.mjs` | Markdown mapping, guarded writes, and undo/redo |
+| `editor/web/` | Browser editor, source pane, and theme preview |
+| `engine/layout.mjs` | Presentation layout and editable-object rendering |
+| `engine/`, `themes/` | Shared validation, shapes, design settings, and themes |
+| `scripts/` | HTML/PDF rendering and export |
+| `test/` | Source, rendering, compatibility, and browser checks |
+| `assets/brand/` | Marpres identity assets and their licensing information |
+
+## Testing
+
+```sh
+npm test
+npm run test:browser
 ```
 
-## License
+For feature-level browser checks:
 
-MIT
+```sh
+npm run test:gui
+npm run test:arrangement
+npm run test:theme-preview
+```
+
+Feature browser checks use temporary decks; layout checks render the demo and fixtures without editing them. All use installed Chrome. Set `CHROME_PATH` when needed. See the [development guide](docs/development.md) for release checks and the current dependency baseline, and `package.json` for all focused checks.

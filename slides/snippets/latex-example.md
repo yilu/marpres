@@ -1,30 +1,37 @@
 ---
 marp: true
-theme: nju-unofficial
+theme: marpres
 paginate: false
 math: mathjax
 ---
 
-# Math snippet
+<!-- _layout: cols 1 1 -->
 
-Inline math: $E = mc^2$ and $k_x^2 + k_y^2 = k_F^2$.
+# Equations stay in Markdown
+
+:::: panel id=snippet-math-source-panel align=left valign=center
+::: box id=snippet-math-description
+## A simple model
+
+A weighted combination of two inputs:
+
+$y = w_1x_1 + w_2x_2 + b$
+
+Keep the explanation beside the equation.
+:::
+::::
+
+:::: panel id=snippet-math-equation-panel valign=center
+::: box id=snippet-math-equation
+$$
+\mathbf y = X\mathbf w + \mathbf b
+$$
 
 $$
-\chi(q,\omega) = \frac{\chi_0(q,\omega)}{1 - U \chi_0(q,\omega)}
-$$
-
-$$
-A =
-\begin{pmatrix}
-1 & t & 0 \\
-t & 1 & t \\
-0 & t & 1
+X = \begin{pmatrix}
+1 & 2 \\
+3 & 4
 \end{pmatrix}
 $$
-
-$$
-\begin{aligned}
-F(T) &= E - TS \\
-C_V &= -T \frac{\partial^2 F}{\partial T^2}
-\end{aligned}
-$$
+:::
+::::
