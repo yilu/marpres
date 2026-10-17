@@ -18,7 +18,8 @@
     "legacy:html": "marp --config-file ./marp.config.mjs --html --output ./dist/legacy-demo.html ./test/fixtures/legacy-demo.md",
     "legacy:pdf": "marp --config-file ./marp.config.mjs --pdf --output ./dist/legacy-demo.pdf ./test/fixtures/legacy-demo.md",
     "test:titles": "node test/title-browser.mjs",
-    "test:print": "node test/print-browser.mjs"
+    "test:print": "node test/print-browser.mjs",
+    "test:presenter": "node test/notes-presenter-browser.mjs && node test/presenter-overlay-browser.mjs && node test/presenter-browser.mjs"
   },
   "devDependencies": {
     "@marp-team/marp-cli": "4.3.1",

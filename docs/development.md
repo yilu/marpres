@@ -14,6 +14,7 @@ npm run test:titles
 npm run test:export
 npm run test:media
 npm run test:print
+npm run test:presenter
 npm run build
 npm run legacy:pdf
 ```
@@ -37,3 +38,5 @@ As of 2026-10-17, `npm audit` still reports ten affected dependency-tree entries
 | `katex` 0.16.47 | [Trust bypass when prototype pollution already exists](https://github.com/advisories/GHSA-238p-pmpm-9mq7); the fixed release is outside Marp Core 4's dependency range. |
 
 These are unresolved dependencies, not a clean audit. The current PDF exporter uses installed Chrome through Playwright. Do not use `npm audit fix --force` as a release step: its suggested changes include an incompatible CLI downgrade and a new Marp major version. A future renderer/dependency migration needs math, theme, export, and legacy-deck validation together.
+
+The presenter browser suite covers guarded notes, two-window stage navigation, private-note isolation, live pointers and ink, slide/whiteboard history, fullscreen, timers, controller ownership, recovery, and session isolation. It uses temporary decks and installed Chrome.

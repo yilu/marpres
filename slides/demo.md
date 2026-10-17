@@ -36,6 +36,16 @@ Write Markdown, shape the layout, then present or export.
 A hands-on tour · 12 slides · one Markdown source
 :::
 
+<!-- notes
+Introduce the source-and-canvas workflow.
+
+- Use **Present** for two screens and **Play** for a quick rehearsal.
+- Move the audience window to the second display, then enter fullscreen there.
+- Start the timer when speaking begins.
+
+This reminder is visible only in the presenter console.
+-->
+
 ---
 
 <!-- _layout: cols 1 1 -->
@@ -377,6 +387,16 @@ Leave one idea to remember.
 Try it · Play, then press Space or →. Each cumulative stage becomes a PDF page.
 :::
 
+<!-- notes
+Reveal the three ideas one at a time.
+
+1. Set the context.
+2. Show the evidence.
+3. Land the point.
+
+The next-preview panel shows the next reveal. Use the laser or spotlight on the current preview to guide attention.
+-->
+
 ---
 
 <!-- _appearance: dark -->
@@ -492,3 +512,9 @@ Download a clean 16:9 deck, with one page per cumulative stage.
 ::: footer
 Marpres · Write the story. Shape the slide. Share the result.
 :::
+
+<!-- notes
+Finish with the complete workflow: Markdown, visual refinement, then presentation or PDF.
+
+The demo has 12 slides and 14 exported stage pages. Notes and live ink stay out of the audience deck and exports.
+-->

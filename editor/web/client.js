@@ -1,6 +1,7 @@
 import { createCropEditor } from './crop-editor.js'
 import { createSourcePane } from './source-pane.js'
 import { createThemePanel } from './theme-panel.js'
+import { createNotesPanel } from './notes-panel.js'
 
 const $ = selector => document.querySelector(selector)
 const ui = {
@@ -137,9 +138,10 @@ function updateControls() {
   ui.next.disabled = state.busy || state.cropping || state.page >= slides().length - 1
   ui.reload.disabled = state.cropping
   themePanel.sync(state.page)
+  notesPanel.sync()
   for (const element of document.querySelectorAll('#style-form input, #style-form select, #style-form button, #shape-form input, #shape-form button, #font-field input, #toolbar-crop, #delete-image')) element.disabled = unavailable || multiple()
   if (multiple()) for (const element of document.querySelectorAll('#geometry-form input, #geometry-form button, #content-form button, #content-form textarea, #crop-form button, #stage-form input, #stage-form button, #reset-position')) element.disabled = true
-  for (const element of document.querySelectorAll('#insert-image, #shape-menu-toggle, [data-slide-action], #slide-title, #play, #export-pdf')) element.disabled = !canMutate()
+  for (const element of document.querySelectorAll('#insert-image, #shape-menu-toggle, [data-slide-action], #slide-title, #play, #present, #export-pdf')) element.disabled = !canMutate()
   for (const element of document.querySelectorAll('[data-distribute]')) element.disabled = unavailable || state.selection.length < 3
   for (const element of document.querySelectorAll('[data-slide-action]')) {
     const action = element.dataset.slideAction
@@ -220,6 +222,7 @@ function save(patch, id = state.selected?.dataset.editId) {
 
 async function history(direction) {
   if (state.busy || state.conflict || state.cropping || state.gesture || state.nudge || !state.deck?.history?.[direction === 'undo' ? 'canUndo' : 'canRedo']) return
+  if (notesPanel.hasDrafts()) { status('Save or discard your notes draft before undo or redo.', 'conflict'); return }
   const committed = state.deck
   const id = selectedIds()
   setBusy(true)
@@ -288,6 +291,7 @@ function showPage(index) {
   drawGuides()
   refreshNavigatorSelection()
   themePanel.sync(state.page)
+  notesPanel.sync()
 }
 
 function refreshStages() {
@@ -760,6 +764,7 @@ ui.reload.addEventListener('click', async () => {
   setBusy(true)
   try {
     const id = state.selected?.dataset.editId
+    notesPanel.invalidate()
     await render(await request('/api/deck'), id)
     state.conflict = false
     document.body.classList.remove('conflicted')
@@ -817,7 +822,7 @@ document.addEventListener('keyup', event => {
 })
 window.addEventListener('blur', () => { state.alt = false; updateSnapping(); flushNudge() })
 window.addEventListener('beforeunload', event => {
-  if (textDrafts.size) { event.preventDefault(); event.returnValue = '' }
+  if (textDrafts.size || notesPanel.hasDrafts()) { event.preventDefault(); event.returnValue = '' }
 })
 new ResizeObserver(() => { fitSlide(); drawGuides(); fitThumbnails() }).observe(ui.workspace)
 
@@ -889,6 +894,7 @@ function refreshNavigatorSelection() {
   $('#slide-title').value = slideTitle(state.page)
 }
 for (const button of document.querySelectorAll('[data-slide-action]')) button.addEventListener('click', async () => {
+  if (!canMutate() || !await notesPanel.savePending()) return
   closeShapes()
   const result = await mutate('/api/slide', { action: button.dataset.slideAction, slide: state.page + 1 }, null, 'Slide updated')
   if (result && button.dataset.slideAction === 'delete') for (const id of textDrafts.keys()) if (!result.objects.some(object => object.id === id)) textDrafts.delete(id)
@@ -1151,7 +1157,32 @@ async function savePendingDrafts() {
     const result = await mutate('/api/content', { id, content: draft.value }, id, 'Text saved')
     if (!result) return false
   }
-  return true
+  return notesPanel.savePending()
+}
+let openingPresenter = false
+async function openPresenter() {
+  if (!canMutate() || openingPresenter) return
+  // A user gesture owns exactly one popup; asynchronous saves happen afterwards.
+  const popup = window.open('about:blank', '_blank')
+  if (popup) popup.opener = null
+  openingPresenter = true
+  const position = editorPosition()
+  $('#presenter-fallback').hidden = true
+  try {
+    if (!await savePendingDrafts()) { popup?.close(); return }
+    restorePosition(position)
+    setBusy(true); status('Preparing presenter…')
+    const session = await request('/api/presentation', { hash: state.deck.hash, slide: position.page + 1 })
+    if (popup && !popup.closed) {
+      popup.location.replace(session.presenterUrl)
+      status('Presenter console opened')
+    } else {
+      $('#presenter-fallback a').href = session.presenterUrl
+      $('#presenter-fallback').hidden = false
+      status('Use the presenter link to open the console')
+    }
+  } catch (error) { popup?.close(); showError(error) }
+  finally { openingPresenter = false; setBusy(false) }
 }
 async function startPresentation() {
   if (!canMutate()) return
@@ -1206,6 +1237,7 @@ function revealPresentationControls() {
   presentationControlsTimer = setTimeout(() => document.body.classList.remove('presentation-controls-visible'), 1600)
 }
 $('#play').addEventListener('click', startPresentation)
+$('#present').addEventListener('click', openPresenter)
 $('#presentation-exit').addEventListener('click', exitPresentation)
 $('#presentation-previous').addEventListener('click', () => advancePresentation(-1))
 $('#presentation-next').addEventListener('click', () => advancePresentation(1))
@@ -1251,6 +1283,7 @@ $('#export-pdf').addEventListener('click', async () => {
 
 const sourcePane = createSourcePane({ getDeck: () => state.deck, getSelection: selectedIds, navigate: (slide, id) => { if (canMutate()) { showPage(slide - 1); if (id) select(objectById(id)) } } })
 const themePanel = createThemePanel({ getDeck: () => state.deck, canMutate, mutate, report: status })
+const notesPanel = createNotesPanel({ getDeck: () => state.deck, getPage: () => state.page, canMutate, mutate, navigate: showPage, report: status })
 
 await loadShapes()
 

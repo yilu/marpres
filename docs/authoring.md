@@ -374,4 +374,8 @@ External file edits trigger a source conflict. Save the external edit, choose **
 | Apply/cancel cropping | Enter / Escape |
 | Leave Play | Escape |
 
-The fine grid is a visual guide. Optional snapping uses object and layout guides. There is no automatic collision avoidance, semantic connector routing, direct rich-text editing inside the slide, or editable PowerPoint/Keynote export. See [compatibility](compatibility.md) for renderer boundaries and [the roadmap](roadmap.md) for deferred presenter tools.
+The fine grid is a visual guide. Optional snapping uses object and layout guides. There is no automatic collision avoidance, semantic connector routing, direct rich-text editing inside the slide, or editable PowerPoint/Keynote export. See [compatibility](compatibility.md) for renderer boundaries and the [presenter guide](presenter.md) for two-screen talks.
+
+## Presenter mode and notes
+
+Use **Present** for two-screen talks. The console shows current/next previews, notes, a timer, pointer modes, and slide/whiteboard drawing tools. Add hidden Markdown notes with **Notes** in the editor. See the [presenter guide](presenter.md) for setup, shortcuts, and recovery. **Play** remains the quick rehearsal mode.

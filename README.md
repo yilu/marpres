@@ -37,7 +37,7 @@ CHROME_PATH=/path/to/chrome npm run build
 1. **Write the content.** Start with `theme: marpres`. Put selectable text in `::: box id=...` blocks and images in `::: figure id=...` blocks. Give every editable object a unique ID across the deck.
 2. **Arrange it visually.** Select and drag objects, resize with handles, and double-click a figure to crop. Double-click text to edit it in the inspector; **Apply text** saves the draft.
 3. **Set a shared style.** Open **Theme** to preview fonts, light/dark palettes, CSS, and title/footer/page-number positions on actual slides. **Apply to deck** saves one undoable change. Presets let you reuse these settings in another deck.
-4. **Rehearse and export.** **Play** starts from the current slide and advances through its reveal stages. Escape returns to editing. **Export PDF** downloads the presentation.
+4. **Rehearse, present, and export.** **Play** rehearses from the current slide. **Present** opens a console with current/next previews, notes, timer, pointers, and drawing tools; its **Open audience window** button creates the second-screen view. **Export PDF** downloads the presentation.
 
 The [authoring guide](docs/authoring.md) covers syntax, shortcuts, and the complete workflow. The [starter deck](slides/starter.md) is a small starting point; the [demo](slides/demo.md) shows the features together.
 
@@ -81,7 +81,7 @@ Reveals are cumulative: stage 0 appears first, followed by each used positive st
 
 Marpres currently provides a local, single-user editor and 16:9 HTML/PDF output. Editable PowerPoint/Keynote export, attached diagram connectors, and automatic collision avoidance are not implemented. Remote images can display in Markdown; crop figures require local image files.
 
-Single-window Play is available. Dual-screen presenter view, notes, pointers, and whiteboard tools are [planned separately](docs/roadmap.md).
+For two-screen talks, see the [presenter guide](docs/presenter.md). Add hidden Markdown notes with **Notes** in the editor. Presentations use a fixed snapshot; live pointers, slide annotations, and the whiteboard do not change your deck or exports. Move the audience window to the second display and enter fullscreen there.
 
 Existing decks have a retained legacy rendering path. See [compatibility and migration](docs/compatibility.md) before moving a deck between renderers.
 
@@ -93,6 +93,7 @@ Existing decks have a retained legacy rendering path. See [compatibility and mig
 | `editor/server.mjs` | Local editor server |
 | `editor/source-store.mjs` | Markdown mapping, guarded writes, and undo/redo |
 | `editor/web/` | Browser editor, source pane, and theme preview |
+| `presenter/` | Dual-window console, audience view, navigation, pointers, and live ink |
 | `engine/layout.mjs` | Presentation layout and editable-object rendering |
 | `engine/`, `themes/` | Shared validation, shapes, design settings, and themes |
 | `scripts/` | HTML/PDF rendering and export |
@@ -112,6 +113,7 @@ For feature-level browser checks:
 npm run test:gui
 npm run test:arrangement
 npm run test:theme-preview
+npm run test:presenter
 ```
 
 Feature browser checks use temporary decks; layout checks render the demo and fixtures without editing them. All use installed Chrome. Set `CHROME_PATH` when needed. See the [development guide](docs/development.md) for release checks and the current dependency baseline, and `package.json` for all focused checks.

@@ -48,6 +48,7 @@
     </div>
     <span class="command-spacer"></span>
     <button id="play" class="command play-button" disabled><svg class="icon"><use href="#i-play"/></svg><span>Play</span></button>
+    <button id="present" class="command" title="Open presenter console with private notes and an audience window" disabled><svg class="icon"><use href="#i-play"/></svg><span>Present</span></button>
     <button id="export-pdf" class="command" disabled><svg class="icon"><use href="#i-export"/></svg><span>Export PDF</span></button>
   </header>
   <div class="context-bar" aria-label="Formatting toolbar">
@@ -99,6 +100,7 @@
   <footer class="status-bar"><span id="status" role="status">Opening deck…</span><button id="reload" hidden>Reload source</button><span class="status-spacer"></span><label for="grid-mode">Guides</label><select id="grid-mode"><option value="off">Off</option><option value="layout" selected>Layout</option><option value="fine">Grid</option></select><label class="toggle" title="Snap to slide, layout and nearby object guides. Hold Alt to bypass."><input id="snap" type="checkbox">Snap</label><button id="toggle-inspector" class="quiet" aria-label="Show or hide inspector">Inspector</button></footer>
   <div id="shape-gallery" class="shape-gallery" role="dialog" aria-label="Insert shape" hidden><div class="gallery-heading"><strong>Shapes</strong><button id="close-shapes" class="icon-button" aria-label="Close shapes"><svg class="icon"><use href="#i-close"/></svg></button></div><div id="shape-groups"></div><form id="insert-form" hidden><select id="shape-type" aria-label="Shape type"><option value="arrow">Arrow</option></select><button id="insert-shape" type="submit">Insert</button></form></div>
   <div id="selection-marquee" hidden></div>
+  <div id="presenter-fallback" role="status" hidden><span>Your browser blocked the new window.</span> <a target="_blank" rel="noopener">Open presenter console ↗</a><button type="button" aria-label="Dismiss presenter link" onclick="this.parentElement.hidden=true">×</button></div>
   <div id="presentation-controls" hidden><button id="presentation-exit"><svg class="icon"><use href="#i-close"/></svg>Exit presentation</button><span id="presentation-position"></span><button id="presentation-previous" aria-label="Previous presentation step">‹</button><button id="presentation-next" aria-label="Next presentation step">›</button></div>
 </body>
 </html>
