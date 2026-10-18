@@ -121,7 +121,7 @@ export async function createDraftServer({ file, port = 3030, renderer, ui='gui' 
         '/client.css': ['web/client.css', 'text/css; charset=utf-8'],
         '/vendor/moveable.min.js': ['../node_modules/moveable/dist/moveable.min.js', 'text/javascript; charset=utf-8']
       }
-      for (const name of ['client.js', 'view.js', 'overlay.js', 'layout.js', 'model.mjs', 'geometry.mjs', 'presenter.css']) assets[`/presenter/${name}`] = [`../presenter/${name}`, name.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/javascript; charset=utf-8']
+      for (const name of ['client.js', 'view.js', 'overlay.js', 'layout.js', 'displays.js', 'model.mjs', 'geometry.mjs', 'presenter.css']) assets[`/presenter/${name}`] = [`../presenter/${name}`, name.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/javascript; charset=utf-8']
       const asset = assets[url.pathname] || (ui==='gui'&&/^\/[a-z][a-z0-9-]*\.js$/.test(url.pathname)?['web'+url.pathname,'text/javascript; charset=utf-8']:null)
       if (!asset) throw new SourceError('Not found.', 'NOT_FOUND', 404)
       let content = await readFile(resolve(here, asset[0]), asset[1] === 'image/x-icon' ? undefined : 'utf8')

@@ -376,4 +376,4 @@ The fine grid is a visual guide. Optional snapping uses object and layout guides
 
 ## Presenter mode and notes
 
-Use **Present** for two-screen talks. The console shows current/next previews, notes, a timer, pointer modes, and slide/whiteboard drawing tools. Add hidden Markdown notes with **Notes** in the editor. See the [presenter guide](presenter.md) for setup, shortcuts, and recovery. **Preview** remains the quick rehearsal mode.
+Use **Present** for talks on one or two screens. The console shows current/next previews, notes, a timer, pointer modes, and slide/whiteboard drawing tools. **Start presenting** places the audience on another display with permission, or shows the slide fullscreen on a single screen. **Swap displays** exchanges an established two-screen setup. Add hidden Markdown notes with **Notes** in the editor. See the [presenter guide](presenter.md) for setup, browser fullscreen limits, shortcuts, and recovery. **Preview** remains the quick rehearsal mode.

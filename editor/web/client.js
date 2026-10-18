@@ -1163,7 +1163,13 @@ let openingPresenter = false
 async function openPresenter() {
   if (!canMutate() || openingPresenter) return
   // A user gesture owns exactly one popup; asynchronous saves happen afterwards.
-  const popup = window.open('about:blank', '_blank')
+  // A dedicated popup can be moved independently of the editor's other tabs.
+  // Leave room for browser chrome so it opens on the editor's current display.
+  const width = Math.max(320, Math.min(1440, screen.availWidth - 16))
+  const height = Math.max(240, Math.min(900, screen.availHeight - 80))
+  const left = Number.isFinite(screen.availLeft) ? screen.availLeft : window.screenX
+  const top = Number.isFinite(screen.availTop) ? screen.availTop : window.screenY
+  const popup = window.open('about:blank', '_blank', `popup,left=${left},top=${top},width=${width},height=${height}`)
   if (popup) popup.opener = null
   openingPresenter = true
   const position = editorPosition()

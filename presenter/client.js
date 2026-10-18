@@ -2,13 +2,14 @@ import { initialState, reducePresentation, nextPosition, currentInk, inkKey, ela
 import { SlideView } from './view.js'
 import { createOverlay } from './overlay.js'
 import { setupPresenterLayout } from './layout.js'
+import { setupConsoleDisplays, setupAudienceDisplays } from './displays.js'
 
 const $=selector=>document.querySelector(selector)
 const role=document.body.dataset.role, presenter=role==='presenter'
 const id=new URLSearchParams(location.search).get('session')
 const key=new URLSearchParams(location.hash.slice(1)).get('key')||''
 const client=crypto.randomUUID(), storageKey=`marpres:session:${id}`
-let deck,state,channel,view,nextView,overlay,epoch=0,revision=0,seenEpoch=0,seenRevision=-1,controller=null,ended=false,releaseLock
+let deck,state,channel,view,nextView,overlay,epoch=0,revision=0,seenEpoch=0,seenRevision=-1,controller=null,ended=false,releaseLock,displayControls
 let lastController=Date.now(),lastPage=-1,transientFrame,persistTimer,hudTimer,heartbeat,timerInterval
 const audienceWindows=new Map()
 const toolDefinitions=[
@@ -152,7 +153,7 @@ async function fullscreen() {
 function showEnded() {
   ended=true;clearInterval(heartbeat);clearInterval(timerInterval);clearTimeout(hudTimer);clearTimeout(persistTimer)
   if(transientFrame)cancelAnimationFrame(transientFrame)
-  overlay?.destroy();channel?.close();releaseLock?.()
+  displayControls?.destroy();overlay?.destroy();channel?.close();releaseLock?.()
   if(presenter) {
     $('#console').hidden=true;$('#failure').hidden=false;$('#failure h1').textContent='Presentation ended'
     $('#failure-message').textContent='Your slides and notes are unchanged. Start a new presentation from the editor.';$('#retry').hidden=true
@@ -181,12 +182,6 @@ function setupConsole() {
   $('#ink-color').addEventListener('input',event=>dispatch({type:'color',color:event.target.value}))
   $('#ink-width').addEventListener('input',event=>dispatch({type:'width',width:Number(event.target.value)}))
   $('#target').addEventListener('change',event=>dispatch({type:'target',minutes:Number(event.target.value)}))
-  $('#open-audience').addEventListener('click',()=>{
-    const url=`/audience?session=${encodeURIComponent(id)}`
-    const popup=window.open(url,`marpres-audience-${id}`,'popup,width=1280,height=720')
-    if(!popup){status('The audience window was blocked. Allow popups, or open this link: ');const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener';link.textContent='Audience window';$('#status').append(link)}
-    else {popup.focus();status('Move the audience window to your second display, then choose Enter fullscreen there.')}
-  })
   $('#end').addEventListener('click',endPresentation)
   $('#help-toggle').addEventListener('click',()=>$('#help').showModal())
   $('#help-close').addEventListener('click',()=>$('#help').close())
@@ -194,12 +189,14 @@ function setupConsole() {
   view=new SlideView($('#current-view'),deck)
   nextView=new SlideView($('#next-view'),deck,{label:'Next reveal preview'})
   overlay=createOverlay({host:view.viewport,onAction:dispatch})
+  displayControls=setupConsoleDisplays({id,slideHost:$('#current-view'),onResize:()=>view.resize()})
   timerInterval=setInterval(paintTimer,250)
 }
 function setupAudience() {
   $('#audience').hidden=false;document.title='Marpres · Audience'
   view=new SlideView($('#audience-view'),deck,{label:'Audience slide'})
   overlay=createOverlay({host:view.viewport,onAction:dispatch})
+  displayControls=setupAudienceDisplays({id})
   $('#fullscreen').addEventListener('click',fullscreen)
   $('#audience-previous').addEventListener('click',()=>dispatch({type:'previous'}));$('#audience-next').addEventListener('click',()=>dispatch({type:'next'}))
   document.addEventListener('fullscreenchange',()=>{$('#fullscreen').textContent=document.fullscreenElement?'Exit fullscreen':'Enter fullscreen';view.resize();revealHUD()})
@@ -221,7 +218,7 @@ function keys(event) {
   else if(event.key==='Escape') {
     if(document.fullscreenElement)return
     action=state.blank?{type:'blank'}:state.board?{type:'board'}:{type:'tool',tool:'arrow'}
-  } else if(event.key.toLowerCase()==='f'&&!presenter){event.preventDefault();fullscreen();return}
+  } else if(event.key.toLowerCase()==='f'){event.preventDefault();if(presenter)displayControls.singleScreen();else fullscreen();return}
   else if(event.key==='?'&&presenter){$('#help').showModal();return}
   else {const tool={v:'arrow',l:'laser',s:'spotlight',p:'pen',h:'highlighter',e:'eraser'}[event.key.toLowerCase()];if(tool)action={type:'tool',tool}}
   if(action){event.preventDefault();dispatch(action)}

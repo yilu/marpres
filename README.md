@@ -60,7 +60,7 @@ CHROME_PATH=/path/to/chrome npm run build
 1. **Write the content.** Start with `theme: marpres`. Put selectable text in `::: box id=...` blocks and images in `::: figure id=...` blocks. Give every editable object a unique ID across the deck.
 2. **Arrange it visually.** Select and drag objects, resize with handles, and double-click a figure to crop. Double-click text to edit it in the inspector; **Apply text** saves the draft.
 3. **Set a shared style.** Open **Theme** to preview fonts, light/dark palettes, CSS, and title/footer/page-number positions on actual slides. **Apply to deck** saves one undoable change. Presets let you reuse these settings in another deck.
-4. **Rehearse, present, and export.** **Preview** rehearses inside the editor; Escape returns to editing. The primary **Present** button opens a console with current/next previews, notes, timer, pointers, and drawing tools; its **Open audience window** button creates the second-screen view. **Export PDF** downloads the presentation.
+4. **Rehearse, present, and export.** **Preview** rehearses inside the editor; Escape returns to editing. **Present** opens a console with previews, notes, timer, pointers, and drawing tools. Its **Start presenting** action detects displays with permission and places the audience on another screen; **Swap displays** exchanges them. On one screen, Start shows the slide fullscreen and Escape returns to the console. **Export PDF** downloads the presentation.
 
 The [authoring guide](docs/authoring.md) covers syntax, shortcuts, and the complete workflow. The [starter deck](slides/starter.md) is a small starting point; the [demo](slides/demo.md) shows the features together.
 
@@ -108,7 +108,7 @@ Reveals are cumulative: stage 0 appears first, followed by each used positive st
 
 Marpres currently provides a local, single-user editor and 16:9 HTML/PDF output. Editable PowerPoint/Keynote export, attached diagram connectors, and automatic collision avoidance are not implemented. Remote images can display in Markdown; crop figures require local image files.
 
-For two-screen talks, see the [presenter guide](docs/presenter.md). Add hidden Markdown notes with **Notes** in the editor. Resize the console's notes column with its divider, or hide notes/next preview to give the other card more room. Presentations use a fixed snapshot; live pointers, slide annotations, and the whiteboard do not change your deck or exports. Move the audience window to the second display and enter fullscreen there. Text, equations, and SVG remain vector-rendered; bitmap figures retain their source resolution.
+For two-screen talks, see the [presenter guide](docs/presenter.md). Add hidden Markdown notes with **Notes** in the editor. Resize the console's notes column with its divider, or hide notes/next preview to give the other card more room. Presentations use a fixed snapshot; live pointers, slide annotations, and the whiteboard do not change your deck or exports. Chrome may require one additional **Enter audience fullscreen** click after opening the audience. Manual window placement remains available when display access is unavailable. Text, equations, and SVG remain vector-rendered; bitmap figures retain their source resolution.
 
 Existing decks have a retained legacy rendering path. See [compatibility and migration](docs/compatibility.md) before moving a deck between renderers.
 

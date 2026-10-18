@@ -8,11 +8,22 @@ These interfaces are optional. Markdown-only builds and the original template’
 
 1. Open your deck with `npm run dev -- slides/my-talk.md` and select the starting slide.
 2. Choose **Present**. Valid text and notes drafts are saved before the console opens. Resolve any source conflict first. If the browser blocks the popup, use the presenter link shown in the editor or allow popups for its local address.
-3. In the console, choose **Open audience window**. Move that window to the projector or second display, then click **Enter fullscreen** there. Keep the console on your own screen.
-4. Start the timer when you begin speaking. Its target defaults to **16 minutes** and can be changed independently of slide navigation.
-5. Choose **End** in the console when finished. Audience windows show an ended screen, and the snapshot is released.
+3. In the console, choose **Start presenting**. In Chrome, allow display access when asked. Marpres chooses another display, preferring an external one, and places the audience window there. After a permission prompt, click Start again if the status asks for a fresh click.
+4. If the browser does not allow the new window to enter fullscreen automatically, choose **Enter audience fullscreen** in the console. You can also use **Enter fullscreen** in the audience window. **Swap displays** exchanges the console and audience while preserving the current slide, reveals, notes, timer, and ink.
+5. Start the timer when you begin speaking. Its target defaults to **16 minutes** and can be changed independently of slide navigation.
+6. Choose **End** in the console when finished. Audience windows show an ended screen, and the snapshot is released.
 
-Keep the editor's terminal server running and use the same browser profile and local address for both windows. Marpres targets installed Chrome. The browser controls display placement and [fullscreen permission](https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen); Marpres does not automatically move a window between monitors. Escape exits fullscreen.
+Keep the editor's terminal server running and use the same browser profile and local address for both windows. Marpres targets installed Chrome. Automatic placement uses its permission-gated [Window Management API](https://developer.chrome.com/docs/capabilities/web-apis/window-management); fullscreen remains subject to browser policy. Opening a popup normally consumes the initial click, so another fullscreen click can be necessary. No browser flags or extensions are required. Escape exits fullscreen.
+
+**Detect displays** requests or refreshes display access. With permission already granted, discovery happens when the console opens. **Audience window** remains available for manual placement when discovery is unsupported or denied. Swap is available only when Marpres can identify the connected audience on a separate display. If the browser refuses to move a console opened as an ordinary tab, the status message asks you to move it manually; consoles opened with the editor's Present button use a dedicated popup.
+
+Disconnecting a screen or changing permission updates the controls without resetting the presentation or forcing a new fullscreen window. Arrange the windows or use Start again for the new setup. The operating system decides where a window goes when its display disconnects.
+
+## Presenting with one screen
+
+With one screen, **Start presenting** shows only the current slide and its annotations fullscreen in the console's existing window. Notes, next preview, timer, and editing controls stay outside that fullscreen view. Arrow keys and the normal pointer/drawing shortcuts keep working. Press **Escape** to return to the same console, or **F** to toggle this slide-only view.
+
+No extra audience window is required, and Swap is disabled. The manual Audience window action is still available if you want a separate window for rehearsal. Mirrored displays share the same desktop: they show the fullscreen slide together, and returning to the console makes the console visible on both. Use an extended desktop for private notes on one display and slides on another.
 
 The console shows the current slide, the next reveal, speaker notes, elapsed time, and audience connection status. Forward navigation walks through the used reveal stages before changing slides. Backward navigation returns to the previous slide's last reveal. The slide menu jumps directly to a slide's beginning.
 
@@ -70,7 +81,7 @@ Drawings belong to the presentation session. They do not change the Markdown, un
 | V / L / S | Arrow / laser / spotlight |
 | P / H / E | Pen / highlighter / eraser |
 | Ctrl/⌘ Z / Ctrl/⌘ Shift Z | Undo / redo ink |
-| F, in the audience window | Toggle fullscreen |
+| F | Toggle audience fullscreen, or slide-only fullscreen in the console |
 | Escape | Exit fullscreen, or leave black/whiteboard/pointer mode |
 | ?, in the console | Show shortcuts |
 
@@ -84,4 +95,4 @@ Only one console controls a session at a time. If a second console reports that 
 
 Restarting the server clears its snapshots. An ended or missing session offers a route back to the editor. At most twelve sessions can be active; end unused sessions to make room. Browser storage failures do not stop a live presentation, but can prevent restoration after refresh.
 
-The dual-window console runs from the local editor. Standalone exported HTML retains its existing reveal playback; it does not bundle the console, private notes, or live ink. Remote control from another device, automatic monitor selection, recording, and permanent annotation export are outside this version.
+The dual-window console runs from the local editor. Standalone exported HTML retains its existing reveal playback; it does not bundle the console, private notes, or live ink. Remote control from another device, recording, and permanent annotation export are outside this version. Display tests use real Chrome APIs with virtual monitors; window-manager behavior on a physical projector or a different browser may still require manual placement or a fullscreen click.
