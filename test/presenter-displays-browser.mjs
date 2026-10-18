@@ -274,9 +274,11 @@ try {
   context.setDefaultTimeout(15000)
   const denied = (await consoleWindow(context, 'denied')).consolePage
   await denied.click('#start-presenting')
+  assert.equal(await denied.evaluate(() => !!document.fullscreenElement), false)
+  await denied.click('#present-here')
   await denied.waitForFunction(() => document.fullscreenElement?.id === 'current-view')
   await denied.evaluate(() => document.exitFullscreen())
-  assert.match(await denied.locator('#display-status').textContent(), /denied|unavailable|manual/i)
+  assert.match(await denied.locator('#display-status').textContent(), /denied|unavailable|Present here/i)
   const manualPopup = denied.waitForEvent('popup')
   await denied.click('#open-audience')
   const manual = await manualPopup
@@ -298,6 +300,8 @@ try {
   await context.addInitScript(() => { window.getScreenDetails = undefined })
   const unsupported = (await consoleWindow(context, null)).consolePage
   await unsupported.click('#start-presenting')
+  assert.equal(await unsupported.evaluate(() => !!document.fullscreenElement), false)
+  await unsupported.click('#present-here')
   await unsupported.waitForFunction(() => document.fullscreenElement?.id === 'current-view')
   await unsupported.evaluate(() => document.exitFullscreen())
   assert.match(await unsupported.locator('#display-status').textContent(), /unavailable/i)

@@ -140,6 +140,7 @@ h1,h2,p {
 .display-bar>span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .display-bar button { flex-shrink: 0; font-size: 12px; }
 .display-bar a { color: #c7b6ff; }
+.display-bar.needs-fullscreen { background: #211c32; color: #e1d6ff; }
 #current-view:fullscreen {
   display: grid;
   place-items: center;

@@ -42,9 +42,12 @@ function displayOperation(promise, controller) {
 }
 
 export function setupConsoleDisplays({ id, slideHost, onResize }) {
-  const start = $('#start-presenting'), swap = $('#swap-displays'), detect = $('#detect-displays'), manual = $('#open-audience'), output = $('#display-status')
+  const start = $('#start-presenting'), swap = $('#swap-displays'), detect = $('#detect-displays'), manual = $('#open-audience'), here = $('#present-here'), output = $('#display-status')
   const listeners = new AbortController(), signal = listeners.signal
-  let details, permission, popup, audienceState, blockedURL, notice = '', disposed = false, busy = false, generation = 0, pending, timeout
+  let details, permission, popup, audienceState, blockedURL, notice = '', discoveryFailed = false, disposed = false, busy = false, generation = 0, pending, timeout
+  const supported = () => typeof window.getScreenDetails === 'function'
+  const singleDetected = () => details ? details.screens.length === 1
+    : supported() && !discoveryFailed && permission?.state !== 'denied' && window.screen.isExtended === false
   const alive = () => popup && !popup.closed
   const current = () => containingScreen(details, bounds()) || details?.currentScreen
   const audienceScreen = () => containingScreen(details, audienceState?.bounds)
@@ -56,8 +59,9 @@ export function setupConsoleDisplays({ id, slideHost, onResize }) {
   function render() {
     if (disposed) return
     if (popup?.closed) { popup = null; audienceState = null; cancel(); notice = 'Audience window closed. Start to reopen it.' }
-    const count = details?.screens.length ?? (window.screen.isExtended === false ? 1 : undefined)
-    const description = count ? `${count} display${count === 1 ? '' : 's'}${count === 1 ? ' · single screen' : ''}` : 'Manual display control'
+    const count = details?.screens.length ?? (singleDetected() ? 1 : undefined)
+    const description = count ? `${count} display${count === 1 ? '' : 's'}${count === 1 ? ' · single screen' : ''}`
+      : window.screen.isExtended === true ? 'Multiple displays' : 'Displays not detected'
     output.textContent = `${description}${notice ? ' · ' + notice : ''}`
     if (blockedURL) {
       const link = document.createElement('a'); link.href = blockedURL; link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Open audience manually'
@@ -68,6 +72,9 @@ export function setupConsoleDisplays({ id, slideHost, onResize }) {
     start.disabled = busy
     manual.disabled = busy
     detect.disabled = busy
+    here.hidden = !!details || singleDetected() || (supported() && !discoveryFailed && permission?.state !== 'denied')
+    here.disabled = busy
+    output.parentElement.classList.toggle('needs-fullscreen', !!audienceState && alive() && !audienceState.fullscreen)
     swap.disabled = busy || !alive() || !audienceState || !(count > 1) || !audienceScreen() || screenKey(current()) === screenKey(audienceScreen())
     swap.title = swap.disabled ? 'Start the audience on a separate display and allow display access to swap.' : 'Exchange the console and audience displays without changing the slide.'
   }
@@ -83,30 +90,34 @@ export function setupConsoleDisplays({ id, slideHost, onResize }) {
     details.addEventListener('currentscreenchange', render, { signal })
   }
   async function discover(prompt = false) {
-    if (!window.getScreenDetails) { notice = 'Screen detection unavailable. Use this screen or the audience window.'; return }
+    if (!supported()) {
+      discoveryFailed = true
+      notice = 'Automatic display placement is unavailable in this browser. Use Chrome, or choose Audience window / Present here.'
+      return
+    }
     try {
       if (!permission) {
         permission = await navigator.permissions.query({ name: 'window-management' })
         if (disposed) return
         permission.addEventListener('change', () => {
           const wasWaiting = busy
-          cancel(); details = null; notice = 'Display permission changed.'
+          cancel(); details = null; discoveryFailed = false; notice = 'Display permission changed.'
           void discover(false).then(() => {
             if (wasWaiting && permission.state === 'granted') notice = 'Displays checked. Click Start presenting to continue.'
             render()
           })
         }, { signal })
       }
-      if (permission.state === 'denied') { details = null; notice = 'Display access denied. Manual audience placement is available.'; return }
+      if (permission.state === 'denied') { details = null; discoveryFailed = true; notice = 'Display access denied. Allow window management in site settings, or choose Audience window / Present here.'; return }
       if (!prompt && permission.state !== 'granted') {
         notice = window.screen.isExtended === false ? 'Start shows the slide fullscreen. Escape returns to the console.' : 'Start or Detect displays to allow automatic placement.'
         return
       }
       const found = await window.getScreenDetails()
       if (disposed || permission.state !== 'granted') return
-      attachDetails(found); notice = ''
+      attachDetails(found); discoveryFailed = false; notice = ''
     } catch {
-      details = null; notice = 'Display access unavailable. Manual audience placement is available.'
+      details = null; discoveryFailed = true; notice = 'Display detection failed. Try Detect displays, or choose Audience window / Present here.'
     }
   }
   function isAudience(source) {
@@ -165,7 +176,10 @@ export function setupConsoleDisplays({ id, slideHost, onResize }) {
       requestAudienceFullscreen(audienceScreen()); return
     }
     // A known single screen needs no permission prompt or delayed activation.
-    if (details?.screens.length === 1 || window.screen.isExtended === false || permission?.state === 'denied' || !window.getScreenDetails) { await singleScreen(); return }
+    if (singleDetected()) { await singleScreen(); return }
+    // No detection is not evidence of one display. Keep the console visible
+    // until the author explicitly chooses local fullscreen or a manual window.
+    if (!supported() || permission?.state === 'denied') { await discover(false); render(); return }
     busy = true; const turn = generation; render()
     await discover(true)
     if (disposed || turn !== generation) {
@@ -174,10 +188,11 @@ export function setupConsoleDisplays({ id, slideHost, onResize }) {
       render(); return
     }
     busy = false
+    if (!details?.screens.length) { render(); return }
     if (navigator.userActivation && !navigator.userActivation.isActive) {
       notice = 'Displays checked. Click Start presenting to continue.'; render(); return
     }
-    if ((details?.screens.length || 1) > 1) openAudience(true)
+    if (details.screens.length > 1) openAudience(true)
     else { render(); await singleScreen() }
   }
   async function receive(event) {
@@ -201,17 +216,18 @@ export function setupConsoleDisplays({ id, slideHost, onResize }) {
           ? data.fullscreen ? 'Displays swapped.' : 'Displays swapped. Click Enter audience fullscreen to finish.'
           : 'Audience moved. Move this console manually; the browser did not move its window.'
       } else {
-        notice = data.fullscreen ? 'Audience fullscreen.' : 'Browser requires another fullscreen click. Use Enter audience fullscreen or the audience’s own button.'
+        notice = data.fullscreen ? 'Audience fullscreen.' : 'The browser needs a fresh click. Click Enter audience fullscreen above, or Enter fullscreen in the audience window.'
       }
       busy = false
     } else if (!busy && notice === 'Audience window opening…') {
-      notice = data.fullscreen ? 'Audience fullscreen.' : 'Window placed. Click Enter audience fullscreen to finish.'
+      notice = data.fullscreen ? 'Audience fullscreen.' : 'Audience window opened. One more click is needed: Enter audience fullscreen above.'
     }
     render()
   }
   window.addEventListener('message', receive, { signal })
   document.addEventListener('fullscreenchange', () => { onResize(); render() }, { signal })
   start.addEventListener('click', startPresentation, { signal })
+  here.addEventListener('click', singleScreen, { signal })
   manual.addEventListener('click', () => openAudience(false), { signal })
   swap.addEventListener('click', () => requestAudienceFullscreen(current(), audienceScreen()), { signal })
   detect.addEventListener('click', async () => { busy = true; render(); await discover(true); busy = false; render() }, { signal })

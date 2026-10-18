@@ -9,13 +9,15 @@ These interfaces are optional. Markdown-only builds and the original template’
 1. Open your deck with `npm run dev -- slides/my-talk.md` and select the starting slide.
 2. Choose **Present**. Valid text and notes drafts are saved before the console opens. Resolve any source conflict first. If the browser blocks the popup, use the presenter link shown in the editor or allow popups for its local address.
 3. In the console, choose **Start presenting**. In Chrome, allow display access when asked. Marpres chooses another display, preferring an external one, and places the audience window there. After a permission prompt, click Start again if the status asks for a fresh click.
-4. If the browser does not allow the new window to enter fullscreen automatically, choose **Enter audience fullscreen** in the console. You can also use **Enter fullscreen** in the audience window. **Swap displays** exchanges the console and audience while preserving the current slide, reveals, notes, timer, and ink.
+4. Opening a new audience window normally needs one further click for fullscreen in Chrome. Choose **Enter audience fullscreen** in the console; the highlighted display bar reminds you. You can also use **Enter fullscreen** in the audience window. **Swap displays** exchanges the console and audience while preserving the current slide, reveals, notes, timer, and ink.
 5. Start the timer when you begin speaking. Its target defaults to **16 minutes** and can be changed independently of slide navigation.
 6. Choose **End** in the console when finished. Audience windows show an ended screen, and the snapshot is released.
 
 Keep the editor's terminal server running and use the same browser profile and local address for both windows. Marpres targets installed Chrome. Automatic placement uses its permission-gated [Window Management API](https://developer.chrome.com/docs/capabilities/web-apis/window-management); fullscreen remains subject to browser policy. Opening a popup normally consumes the initial click, so another fullscreen click can be necessary. No browser flags or extensions are required. Escape exits fullscreen.
 
 **Detect displays** requests or refreshes display access. With permission already granted, discovery happens when the console opens. **Audience window** remains available for manual placement when discovery is unsupported or denied. Swap is available only when Marpres can identify the connected audience on a separate display. If the browser refuses to move a console opened as an ordinary tab, the status message asks you to move it manually; consoles opened with the editor's Present button use a dedicated popup.
+
+Safari does not currently expose the display-detection API used here. Use Chrome for automatic placement and swapping. When detection is unsupported, denied, or fails, **Start presenting** keeps the console visible and explains the limitation. It does not assume that there is only one screen. Choose **Audience window** and move it manually, or explicitly choose **Present here** to show the slide fullscreen on the current display.
 
 Disconnecting a screen or changing permission updates the controls without resetting the presentation or forcing a new fullscreen window. Arrange the windows or use Start again for the new setup. The operating system decides where a window goes when its display disconnects.
 
