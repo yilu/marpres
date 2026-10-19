@@ -57,6 +57,8 @@ A second slide, with its own object ID.
 
 A top-level `---` separates slides. Close every container before the next separator. The first `#` heading becomes the slide title; a `##` heading immediately following it can act as a subtitle. Standard Markdown paragraphs, lists, links, tables, code, and math still render.
 
+In the visual editor, double-click the slide title to focus the **Title** field above the canvas, or edit that field directly. Press **Enter** to save or **Escape** to cancel. The field accepts inline Markdown and math; title edits support Undo. Use **Theme** to adjust title fonts and positions throughout the deck.
+
 To make content selectable in the GUI, wrap it in a supported object and give it an ID. IDs must be unique across the entire deck; names such as `overview-plot` and `summary-note` are easy to maintain. Blocks without IDs can render but do not have editing handles. Duplicate IDs produce diagnostics.
 
 A cover can use the bundled title-slide style:

@@ -247,6 +247,7 @@ async function render(data, selectedId) {
   state.invalid = !!data.editingError
   $('#deck-style').textContent = data.css
   ui.deck.innerHTML = data.html
+  for (const title of ui.deck.querySelectorAll('.deck-heading > h1')) title.title = 'Double-click to edit slide title'
   const images = [...ui.deck.querySelectorAll('img')]
   await Promise.all(images.map(image => image.decode?.().catch(() => {})))
   await document.fonts.ready
@@ -623,6 +624,14 @@ ui.deck.addEventListener('mousedown', event => {
 })
 ui.deck.addEventListener('click', event => { if (event.target.closest('a')) event.preventDefault() })
 ui.deck.addEventListener('dblclick', event => {
+  if (event.target.closest('.deck-heading > h1') && canMutate() && !state.space && !state.panning) {
+    select(null)
+    const title = $('#slide-title')
+    title.focus()
+    title.select()
+    status('Edit Title above · Enter saves · Escape cancels')
+    return
+  }
   const object = event.target.closest('.editable-object[data-edit-id]')
   if (object && canMutate() && !multiple()) {
     select(object)
@@ -1062,7 +1071,7 @@ ui.workspace.addEventListener('pointerdown', event => {
     ui.workspace.classList.add('is-panning')
     return
   }
-  if (event.button !== 0 || event.target.closest('.editable-object, .moveable-control-box, .crop-layer')) return
+  if (event.button !== 0 || event.target.closest('.editable-object, .deck-heading > h1, .moveable-control-box, .crop-layer')) return
   if (!canMutate()) return
   event.preventDefault(); event.stopImmediatePropagation()
   marquee = { x: event.clientX, y: event.clientY, pointer: event.pointerId, original: event.shiftKey ? [...state.selection] : [], moved: false }

@@ -146,8 +146,11 @@ button:disabled { opacity: .35; }
 .slide-actions { display: flex; justify-content: center; gap: 4px; padding: 9px 5px; border-top: 1px solid var(--border); }
 .canvas-column { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .canvas-heading { height: 49px; display: flex; align-items: center; padding: 0 24px; flex: none; }
-#slide-title { min-width: 90px; width: 280px; border: 1px solid transparent; background: transparent; color: #787381; padding: 6px 7px; font-size: 11px; text-overflow: ellipsis; }
+.slide-title-label { flex: none; margin-right: 7px; color: #787381; font-size: 11px; }
+#slide-title { min-width: 90px; width: 280px; border: 1px solid #e2ddea; background: #fff; color: #645e70; padding: 6px 7px; font-size: 12px; text-overflow: ellipsis; }
 #slide-title:hover, #slide-title:focus { border-color: #d9d3e6; background: #fff; }
+#deck .deck-heading > h1 { cursor: text; }
+body:not(.presenting) #deck .deck-heading > h1:hover { outline: 1px dashed #9a83c5; outline-offset: 4px; }
 #insertion-control { display: flex; align-items: center; gap: 6px; flex: none; margin: 0 10px; font-size: 10px; color: #787381; }
 #insertion-target { font-size: 10px; padding: 5px 6px; max-width: 125px; }
 #selection-hint { margin-left: auto; color: #96919f; font-size: 10px; white-space: nowrap; }
