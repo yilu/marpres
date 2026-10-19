@@ -59,7 +59,7 @@ CHROME_PATH=/path/to/chrome npm run build
 
 1. **Write the content.** Start with `theme: marpres`. Put selectable text in `::: box id=...` blocks and images in `::: figure id=...` blocks. Give every editable object a unique ID across the deck.
 2. **Arrange it visually.** Select and drag objects, resize with handles, and double-click a figure to crop. Double-click text to edit it in the inspector; **Apply text** saves the draft.
-3. **Set a shared style.** Open **Theme** to preview fonts, light/dark palettes, CSS, and title/footer/page-number positions on actual slides. **Apply to deck** saves one undoable change. Presets let you reuse these settings in another deck.
+3. **Set a shared style.** Open **Theme** to preview fonts, light/dark palettes, CSS, and title/footer/page-number positions on actual slides. Ordinary titles and cover-banner titles have separate size, weight, and font controls. **Apply to deck** saves one undoable change. Presets let you reuse these settings in another deck.
 4. **Rehearse, present, and export.** **Preview** rehearses inside the editor; Escape returns to editing. **Present** opens a console with previews, notes, timer, pointers, and drawing tools. Its **Start presenting** action detects displays with permission and places the audience on another screen; **Swap displays** exchanges them. On one screen, Start shows the slide fullscreen and Escape returns to the console. **Export PDF** downloads the presentation.
 
 The [authoring guide](docs/authoring.md) covers syntax, shortcuts, and the complete workflow. The [starter deck](slides/starter.md) is a small starting point; the [demo](slides/demo.md) shows the features together.

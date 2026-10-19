@@ -276,6 +276,15 @@ body.presenting #source-pane { display: none !important; }
 .theme-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px 15px; margin: 22px 0; }
 .has-theme-preview .theme-type-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 18px 0; }
 .theme-type-grid input { min-width: 0; width: 100%; }
+.theme-type-role { border-top: 1px solid #e9e1f1; margin-top: 20px; padding-top: 16px; }
+.theme-type-role h3 { margin: 0 0 12px; color: #796584; font-size: 12px; font-weight: 600; }
+.theme-type-role .muted { margin: -4px 0 12px; }
+.theme-title-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.theme-title-fields input, .theme-title-fields select { min-width: 0; width: 100%; }
+.theme-title-field { display: flex; flex-direction: column; gap: 8px; }
+.theme-title-family { grid-column: 1 / -1; order: 1; }
+.theme-title-field > span { display: flex; align-items: center; justify-content: space-between; height: 17px; }
+.theme-title-field [data-reset-type] { min-height: 17px; padding: 0 3px; line-height: 1; }
 .theme-panel .theme-checkbox { display: flex; flex-direction: row; align-items: center; gap: 7px; }
 .theme-panel .muted { margin: 18px 0 3px; font-size: 10px; line-height: 1.6; }
 .theme-appearance { display: flex !important; flex-direction: row !important; align-items: center; justify-content: space-between; margin-bottom: 18px; }

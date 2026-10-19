@@ -23,7 +23,7 @@ async function fixture(t) {
 
 test('theme preview renders proposed settings without changing source, history or cached deck', async t => {
   const { app, file, dir, initial, post } = await fixture(t)
-  assert.deepEqual(initial.capabilities, { panelInsertion: true, themePreview: true, masterPositions: true, presenter: true, notes: true })
+  assert.deepEqual(initial.capabilities, { panelInsertion: true, themePreview: true, masterPositions: true, titleTypography: true, presenter: true, notes: true })
   const edited = await (await post('/api/edit', { hash: initial.hash, id: 'body', patch: { font: 30 } })).json()
   const baseline = await (await post('/api/undo', { hash: edited.hash })).json()
   assert.equal(baseline.history.canRedo, true)

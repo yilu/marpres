@@ -2,6 +2,10 @@ const typeFields = [['title_size', 'Slide title'], ['body_size', 'Body text'], [
 const paletteFields = [['background', 'Background'], ['text', 'Text'], ['title', 'Title'], ['muted', 'Secondary text'], ['accent', 'Accent'], ['rule', 'Dividers']]
 const positionRoles = [['title', 'Slide title'], ['footer', 'Footer'], ['page_number', 'Page number']]
 const positionFields = positionRoles.flatMap(([role]) => [`${role}_dx`, `${role}_dy`])
+const titleFields = [
+  ['title_font_family', 'Font family', 'family'], ['title_weight', 'Weight', 'weight'],
+  ['cover_title_size', 'Size (px)', 'size'], ['cover_title_font_family', 'Font family', 'family'], ['cover_title_weight', 'Weight', 'weight']
+]
 
 export function createThemePanel({ getDeck, canMutate, mutate }) {
   const button = document.createElement('button')
@@ -20,7 +24,7 @@ export function createThemePanel({ getDeck, canMutate, mutate }) {
             <button type="button" data-theme-tab="type" aria-selected="true">Typography</button><button type="button" data-theme-tab="colours" aria-selected="false">Colours</button><button type="button" data-theme-tab="positions" aria-selected="false" hidden>Positions</button><button type="button" data-theme-tab="advanced" aria-selected="false">Advanced</button>
           </nav>
           <div class="theme-control-content">
-            <div class="theme-panel" data-theme-panel="type"><label class="theme-font">Font family<input name="font_family" list="font-families" spellcheck="false"></label><div id="theme-type-fields" class="theme-type-grid"></div><label class="theme-checkbox"><input name="show_page_numbers" type="checkbox"> Show page numbers</label><p class="muted">Objects with an individual style keep their overrides.</p></div>
+            <div class="theme-panel" data-theme-panel="type"><label class="theme-font">Deck font family<input name="font_family" list="font-families" spellcheck="false"></label><div id="theme-title-styles" hidden><section class="theme-type-role" data-type-role="title"><h3>Slide titles</h3><div class="theme-title-fields"></div></section><section class="theme-type-role" data-type-role="cover_title"><h3>Cover title</h3><p class="muted">The title inside the cover banner.</p><div class="theme-title-fields"></div></section></div><div id="theme-type-fields" class="theme-type-grid"></div><label class="theme-checkbox"><input name="show_page_numbers" type="checkbox"> Show page numbers</label><p class="muted">Objects with an individual style keep their overrides.</p></div>
             <div class="theme-panel" data-theme-panel="colours" hidden><label class="theme-appearance">Default appearance<select name="appearance"><option value="light">Light</option><option value="dark">Dark</option></select></label><div id="theme-palettes"></div><p class="muted">Each slide can follow the theme or use its own light/dark appearance.</p></div>
             <div class="theme-panel" data-theme-panel="positions" hidden><p class="theme-position-note">Move these elements across the deck, relative to their template positions. Their original layout space stays reserved.</p><div id="theme-position-fields"></div><p class="muted">Offsets use slide pixels. Positive X moves right; positive Y moves down. Footers and page numbers appear only on slides that include them.</p></div>
             <div class="theme-panel" data-theme-panel="advanced" hidden><label>Custom CSS<textarea id="theme-css" aria-label="Custom theme CSS" spellcheck="false" rows="10" placeholder="/* Additional shared slide styles */"></textarea></label><p class="muted">Shared styles and CSS travel together in a theme preset.</p></div>
@@ -44,6 +48,7 @@ export function createThemePanel({ getDeck, canMutate, mutate }) {
   const previewStatus = dialog.querySelector('#theme-preview-status'), previewError = dialog.querySelector('#theme-preview-error')
   const token = document.querySelector('meta[name="editor-token"]').content
   let capabilities = {}, baseHash, currentPage = 0, version = 0, timer, pending, lastValid, requestedDesign, applying = false
+  const titleOverrides = new Set()
 
   for (const [key, label] of typeFields) {
     const field = document.createElement('label'), input = document.createElement('input')
@@ -51,6 +56,23 @@ export function createThemePanel({ getDeck, canMutate, mutate }) {
     input.type = 'number'; input.min = '8'; input.max = '200'; input.step = 'any'; input.name = key
     field.append(input)
     dialog.querySelector('#theme-type-fields').append(field)
+  }
+  for (const [key, label, type] of titleFields) {
+    const role = key.startsWith('cover_') ? 'cover_title' : 'title'
+    const field = document.createElement('div'), caption = document.createElement('span'), labelElement = document.createElement('label'), reset = document.createElement('button')
+    const input = document.createElement(type === 'weight' ? 'select' : 'input')
+    field.className = `theme-title-field ${type === 'family' ? 'theme-title-family' : ''}`
+    labelElement.textContent = label; labelElement.htmlFor = `theme-${key}`
+    input.id = `theme-${key}`; input.name = key; input.dataset.titleStyle = ''; input.setAttribute('aria-label', `${role === 'title' ? 'Slide title' : 'Cover title'} ${label.toLowerCase()}`)
+    if (type === 'weight') {
+      const names = ['Thin', 'Extra light', 'Light', 'Regular', 'Medium', 'Semibold', 'Bold', 'Extra bold', 'Black']
+      input.append(...names.map((name, index) => new Option(`${name} · ${(index + 1) * 100}`, String((index + 1) * 100))))
+    } else if (type === 'size') { input.type = 'number'; input.min = '8'; input.max = '200'; input.step = 'any' }
+    else { input.type = 'text'; input.setAttribute('list', 'font-families'); input.spellcheck = false }
+    reset.type = 'button'; reset.className = 'quiet'; reset.dataset.resetType = key; reset.textContent = '↶'; reset.title = `Use inherited ${label.toLowerCase()}`; reset.setAttribute('aria-label', `Reset ${role.replaceAll('_', ' ')} ${label.toLowerCase()}`)
+    reset.addEventListener('click', () => { titleOverrides.delete(key); syncTitleInheritance(); schedulePreview() })
+    caption.append(labelElement, reset); field.append(caption, input)
+    dialog.querySelector(`[data-type-role="${role}"] .theme-title-fields`).append(field)
   }
   for (const mode of ['light', 'dark']) {
     const section = document.createElement('section'), heading = document.createElement('h3')
@@ -98,10 +120,25 @@ export function createThemePanel({ getDeck, canMutate, mutate }) {
     if (!design?.theme) return
     const theme = design.theme
     for (const key of ['font_family', 'appearance', ...typeFields.map(([key]) => key)]) form.elements[key].value = theme[key]
+    titleOverrides.clear()
+    for (const [key] of titleFields) if (theme[key] != null) { titleOverrides.add(key); form.elements[key].value = theme[key] }
+    syncTitleInheritance()
     for (const key of positionFields) form.elements[key].value = theme[key] ?? 0
     form.elements.show_page_numbers.checked = theme.show_page_numbers
     for (const mode of ['light', 'dark']) for (const [key] of paletteFields) form.elements[`${mode}.${key}`].value = theme.palettes[mode][key]
     dialog.querySelector('#theme-css').value = design.css ?? ''
+  }
+  function syncTitleInheritance() {
+    const inherited = key => {
+      if (key === 'title_font_family') return form.elements.font_family.value
+      if (key === 'title_weight') return '400'
+      if (key === 'cover_title_size') return Number((Number(form.elements.title_size.value) * 49 / 47.84).toFixed(4))
+      return form.elements[key.replace('cover_', '')].value
+    }
+    for (const [key] of titleFields) {
+      if (!titleOverrides.has(key)) form.elements[key].value = inherited(key)
+      dialog.querySelector(`[data-reset-type="${key}"]`).disabled = !titleOverrides.has(key)
+    }
   }
   function numberValue(key, label, min, max) {
     const value = form.elements[key].value.trim(), number = Number(value)
@@ -111,6 +148,7 @@ export function createThemePanel({ getDeck, canMutate, mutate }) {
   function values() {
     const theme = { font_family: form.elements.font_family.value.trim(), appearance: form.elements.appearance.value, show_page_numbers: form.elements.show_page_numbers.checked, palettes: { light: {}, dark: {} } }
     for (const [key, label] of typeFields) theme[key] = numberValue(key, label, 8, 200)
+    if (capabilities.titleTypography) for (const [key, label, type] of titleFields) theme[key] = !titleOverrides.has(key) ? null : type === 'family' ? form.elements[key].value.trim() : numberValue(key, label, type === 'weight' ? 100 : 8, type === 'weight' ? 900 : 200)
     if (capabilities.masterPositions) for (const [role, label] of positionRoles) for (const axis of ['x', 'y']) {
       const bound = axis === 'x' ? 1280 : 720
       theme[`${role}_d${axis}`] = numberValue(`${role}_d${axis}`, `${label} ${axis.toUpperCase()} offset`, -bound, bound)
@@ -186,7 +224,11 @@ export function createThemePanel({ getDeck, canMutate, mutate }) {
     timer = setTimeout(() => requestPreview(requestVersion), delay)
   }
   new ResizeObserver(fitPreview).observe(previewViewport)
-  form.addEventListener('input', event => { if (event.target !== previewSlide) schedulePreview() })
+  form.addEventListener('input', event => {
+    if (event.target.matches('[data-title-style]')) titleOverrides.add(event.target.name)
+    syncTitleInheritance()
+    if (event.target !== previewSlide) schedulePreview()
+  })
   form.addEventListener('change', event => { if (event.target !== previewSlide && event.target.id !== 'theme-file') schedulePreview() })
   previewSlide.addEventListener('change', () => { if (lastValid) paintPreview(lastValid) })
 
@@ -197,6 +239,10 @@ export function createThemePanel({ getDeck, canMutate, mutate }) {
     baseHash = deck.hash
     requestedDesign = null
     capabilities = deck.capabilities ?? {}
+    dialog.querySelector('#theme-title-styles').hidden = !capabilities.titleTypography
+    const titleSizeField = form.elements.title_size.closest('label')
+    const titleFieldsHost = dialog.querySelector(capabilities.titleTypography ? '[data-type-role="title"] .theme-title-fields' : '#theme-type-fields')
+    titleFieldsHost.prepend(titleSizeField)
     preview.hidden = !capabilities.themePreview
     dialog.classList.toggle('has-theme-preview', !!capabilities.themePreview)
     dialog.querySelector('[data-theme-tab="positions"]').hidden = !capabilities.masterPositions

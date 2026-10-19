@@ -10,6 +10,11 @@ export const derivedPaletteRoles = ['surface', 'surface-alt', 'rule-strong', 'ti
 export const defaultDeckTheme = Object.freeze({
   font_family: 'PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif',
   title_size: 47.84,
+  title_font_family: null,
+  title_weight: null,
+  cover_title_size: null,
+  cover_title_font_family: null,
+  cover_title_weight: null,
   body_size: 26,
   caption_size: 25,
   reference_size: 18,
@@ -41,14 +46,19 @@ export function normalizeDeckTheme(theme = {}) {
   keys(theme, Object.keys(defaultDeckTheme), 'theme')
   const out = structuredClone(defaultDeckTheme)
   for (const [key, value] of Object.entries(theme)) {
-    if (key.endsWith('_size')) {
+    if (value === null && defaultDeckTheme[key] === null) {
+      out[key] = null
+    } else if (key.endsWith('_weight')) {
+      if (!Number.isInteger(value) || value < 100 || value > 900 || value % 100) throw new Error(`Invalid ${key}. Use a weight from 100 to 900 in steps of 100.`)
+      out[key] = value
+    } else if (key.endsWith('_size')) {
       if (typeof value !== 'number' || !Number.isFinite(value) || value < 8 || value > 200) throw new Error(`Invalid ${key}. Use a number from 8 to 200.`)
       out[key] = Number(value.toFixed(4))
     } else if (key.endsWith('_dx') || key.endsWith('_dy')) {
       const bound = key.endsWith('_dx') ? 1280 : 720
       if (typeof value !== 'number' || !Number.isFinite(value) || value < -bound || value > bound) throw new Error(`Invalid ${key}. Use a number from ${-bound} to ${bound}.`)
       out[key] = Number(value.toFixed(4))
-    } else if (key === 'font_family') {
+    } else if (key.endsWith('font_family')) {
       if (value === null) throw new Error('Invalid font family.')
       out[key] = normalizeEditPatch({ font_family: value }, 'box').font_family
     } else if (key === 'show_page_numbers') {
@@ -100,7 +110,8 @@ export function generateDesignCSS(input = {}) {
     ...['title', 'body', 'caption', 'reference', 'footer', 'page_number'].map(role => `--deck-${role.replaceAll('_', '-')}-size:${theme[`${role}_size`]}px`),
     ...['title', 'footer', 'page_number'].flatMap(role => ['dx', 'dy'].map(axis => `--deck-${role.replaceAll('_', '-')}-${axis}:${theme[`${role}_${axis}`]}px`)),
     ...['title', 'page_number'].map(role => `--deck-${role.replaceAll('_', '-')}-translate:${theme[`${role}_dx`] || theme[`${role}_dy`] ? `${theme[`${role}_dx`]}px ${theme[`${role}_dy`]}px` : 'none'}`),
-    `--deck-cover-title-size:${Number((theme.title_size * 49 / 47.84).toFixed(4))}px`,
+    `--deck-cover-title-size:${theme.cover_title_size ?? Number((theme.title_size * 49 / 47.84).toFixed(4))}px`,
+    ...['title_font_family', 'cover_title_font_family', 'title_weight', 'cover_title_weight'].filter(key => theme[key] !== null).map(key => `--deck-${key.replaceAll('_', '-')}:${key.endsWith('font_family') ? fontFamilyCSS(theme[key]) : theme[key]}`),
     `--deck-page-number-display:${theme.show_page_numbers ? 'block' : 'none'}`,
   ]
   for (const [appearance, palette] of Object.entries(theme.palettes)) {

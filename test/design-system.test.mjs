@@ -74,6 +74,23 @@ test('generated CSS exposes all shared roles and complete coordinated palettes',
   assert.match(css, /--deck-page-number-display:\s*none/)
 })
 
+test('cover typography can override shared title styles without changing old presets', () => {
+  const old = normalizeDeckDesign({ theme: { title_size: 60 } })
+  assert.equal(old.theme.cover_title_size, null)
+  assert.match(generateDesignCSS(old.theme), /--deck-cover-title-size:61\.4548px/)
+  const theme = { title_size: 50, title_font_family: 'Arial, sans-serif', title_weight: 600, cover_title_size: 64, cover_title_font_family: 'Georgia, serif', cover_title_weight: 700 }
+  const stored = getDeckDesign(applyDeckDesign(source, { theme })).theme
+  for (const [key, value] of Object.entries(theme)) assert.equal(stored[key], value)
+  const css = generateDesignCSS(stored)
+  assert.match(css, /--deck-title-size:50px/)
+  assert.match(css, /--deck-cover-title-size:64px/)
+  assert.match(css, /--deck-cover-title-font-family:"Georgia", serif/)
+  assert.match(css, /--deck-title-weight:600/)
+  assert.match(css, /--deck-cover-title-weight:700/)
+  for (const theme of [{ cover_title_size: 0 }, { cover_title_size: '64' }, { title_weight: 750 }, { cover_title_weight: 0 }, { cover_title_font_family: 'Arial; color:red' }]) assert.throws(() => normalizeDeckDesign({ theme }))
+  assert.doesNotMatch(generateDesignCSS({ title_font_family: null, cover_title_weight: null }), /--deck-title-font-family:|--deck-cover-title-weight:/)
+})
+
 test('master position offsets default to zero, round trips and validate each axis', () => {
   const fields = ['title_dx', 'title_dy', 'footer_dx', 'footer_dy', 'page_number_dx', 'page_number_dy']
   const oldPreset = { title_size: 52, body_size: 28 }

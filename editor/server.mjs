@@ -52,7 +52,7 @@ export async function createDraftServer({ file, port = 3030, renderer, ui='gui' 
     let editingError = null, objects=[], slides=[], design
     try { const mapping=mapSource(latest.source),notes=readNotes(latest.source);objects=mapping.objects.map(({id,kind,content,contentEditable,slide,line,endLine})=>({id,kind,content,contentEditable,slide,line:line+1,endLine}));slides=mapping.slides.map(({slide,title,startLine,endLine})=>({slide,title,startLine:startLine+1,endLine,appearance:getSlideAppearance(latest.source,slide),notes:notes[slide-1]})) } catch (error) { editingError = error.message }
     try{design=getDeckDesign(latest.source)}catch(error){design=getDeckDesign('');editingError=editingError||error.message}
-    return { ...lastRendered, history: latest.history, editingError, objects, slides, sourcePath:store.file, design, capabilities:{panelInsertion:true,themePreview:true,masterPositions:true,presenter:true,notes:true} }
+    return { ...lastRendered, history: latest.history, editingError, objects, slides, sourcePath:store.file, design, capabilities:{panelInsertion:true,themePreview:true,masterPositions:true,titleTypography:true,presenter:true,notes:true} }
   }
   const respond = (response, status, value, type = 'application/json; charset=utf-8', extraHeaders={}) => {
     response.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', ...extraHeaders })

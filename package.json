@@ -14,7 +14,7 @@
     "test:shapes": "node test/shapes-browser.mjs",
     "test:media": "node test/media-export-browser.mjs",
     "test:arrangement": "node test/arrangement-browser.mjs",
-    "test:theme-preview": "node test/theme-preview-browser.mjs",
+    "test:theme-preview": "node test/theme-preview-browser.mjs && node test/title-style-browser.mjs",
     "legacy:html": "marp --config-file ./marp.config.mjs --html --output ./dist/legacy-demo.html ./test/fixtures/legacy-demo.md",
     "legacy:pdf": "marp --config-file ./marp.config.mjs --pdf --output ./dist/legacy-demo.pdf ./test/fixtures/legacy-demo.md",
     "test:titles": "node test/title-browser.mjs",

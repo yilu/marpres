@@ -293,7 +293,9 @@ Drag, resize, and rotate a selected shape in the GUI. These are independent draw
 
 Open **Theme** to edit the shared design. The live preview starts at the current slide; choose another preview slide to inspect its content without navigating the editor. Fonts, colours, positions, and CSS update before being saved. Invalid values or CSS leave the last valid preview visible. Closing the dialog discards its uncommitted changes; **Apply to deck** saves one undoable operation.
 
-**Typography** sets the family and sizes for titles, body text, captions, references, footers, and page numbers. Shared sizes range from 8 to 200 pixels. Local object overrides remain effective until **Reset style** restores inheritance.
+**Typography** sets the deck font family and the sizes for body text, captions, references, footers, and page numbers. **Slide titles** and **Cover title** each provide size, weight (including Bold), and font-family controls. Cover controls apply to `title-slide` banners, so enlarging a cover does not change ordinary slide titles. Fields show their effective inherited values; the reset arrow restores inheritance. Without cover overrides, the cover follows the shared title styles and keeps the original size ratio. Shared sizes range from 8 to 200 pixels.
+
+For an individual author name, affiliation, or other text box, select it on the canvas and use the top toolbar: font family, pixel size, **B**, *I*, underline, and strike. Press Enter or leave a field to save its value. Local object overrides remain effective until **Reset style** restores inheritance. MathJax renders equation glyphs using its own math fonts.
 
 **Colours** defines light and dark palettes for background, text, titles, secondary text, accents, and dividers. Set the deck's default appearance here. Use the selector above the canvas for a slide override, or author it directly:
 
