@@ -3,6 +3,7 @@ import { createSourcePane } from './source-pane.js'
 import { createThemePanel } from './theme-panel.js'
 import { createNotesPanel } from './notes-panel.js'
 import { createLayersPanel } from './layers.js'
+import { createColourPicker } from './colour-picker.js'
 
 const $ = selector => document.querySelector(selector)
 const ui = {
@@ -155,6 +156,7 @@ function updateControls() {
   updateAlignmentControls()
   $('#insertion-target').disabled = !canMutate()
   layersPanel.sync()
+  colourPicker.sync()
 }
 
 
@@ -1380,6 +1382,13 @@ const layersPanel = createLayersPanel({
     select(object, extend)
   },
   saveEdits: batchPositions, report: status
+})
+const colourPicker = createColourPicker({
+  getDeck: () => state.deck,
+  getAppearance: () => {
+    const appearance = state.deck?.slides[state.page]?.appearance
+    return appearance && appearance !== 'inherit' ? appearance : state.deck?.design?.theme?.appearance ?? 'light'
+  }
 })
 
 

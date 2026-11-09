@@ -267,6 +267,8 @@ Shift-click to add or remove objects from a selection. Drag on empty canvas to s
 
 Hold **Shift while dragging** to constrain movement to one axis. The first movement chooses horizontal or vertical, measured from the drag's starting position; the axis stays fixed while Shift is held. Release Shift to resume free movement. You can also press Shift after starting a drag. The constraint works with text, shapes, cropped figures and multi-selections; snapping can adjust the active axis without moving the locked coordinate.
 
+Colour controls open a shared palette with the current light/dark theme colours and 24 fixed colours, so repeated choices use the same values. Text colours apply immediately and support Undo. Shape line/fill choices keep the existing **Apply** step, and the fill swatch also offers **No fill**. Theme colours require **Apply to deck**; unsaved theme colours can be reused within the theme editor. **More colours…** opens the native custom picker. Arrow keys navigate swatches, Enter/Space selects, and Escape dismisses without changing the object.
+
 Choose an **Align to** target before using left/centre/right or top/middle/bottom alignment:
 
 - **Selected objects:** the combined visible bounds of two or more objects.

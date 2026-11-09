@@ -120,6 +120,18 @@ button:disabled { opacity: .35; }
 .horizontal-form input:not([type='checkbox']), .horizontal-form select { height: 28px; border: 1px solid var(--border); padding: 4px 7px; background: #fff; }
 .horizontal-form input[type='number'] { width: 60px; }
 .horizontal-form input[type='color'] { width: 30px; padding: 3px; }
+.colour-picker { position: fixed; inset: auto; margin: 0; width: 288px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow: auto; padding: 14px; border: 0; border-radius: 10px; background: #fff; color: var(--ink); box-shadow: 0 6px 24px #28273430; font: 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.colour-section + .colour-section { margin-top: 14px; }
+.colour-section h3 { margin: 0 0 8px; color: var(--ink); font-size: 12px; font-weight: 600; }
+.colour-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.colour-picker .colour-swatch { position: relative; display: block; width: 100%; min-height: 0; aspect-ratio: 1; padding: 0; border: 1px solid #00000020; border-radius: 3px; background: var(--swatch); }
+.colour-picker .colour-swatch:hover { background: var(--swatch); border-color: var(--ink); }
+.colour-picker .colour-swatch[aria-pressed='true']::after { content: ''; position: absolute; left: 37%; top: 23%; width: 24%; height: 42%; border: solid var(--swatch-ink); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.colour-custom { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--ink); cursor: pointer; }
+.colour-custom input[type='color'] { width: 28px; height: 28px; padding: 2px; cursor: pointer; }
+.colour-picker .colour-none { width: 100%; justify-content: flex-start; margin-top: 10px; }
+.horizontal-form .colour-fill-trigger { flex: none; width: 30px; height: 28px; min-height: 0; padding: 4px; border-color: var(--border); }
+.colour-fill-trigger .icon { color: #b8361f; }
 #font-family { width: 215px; text-overflow: ellipsis; }
 .horizontal-form select { width: 106px; font-size: 11px; }
 .toolbar-divider { height: 20px; border-left: 1px solid var(--border); margin: 0 2px; }
