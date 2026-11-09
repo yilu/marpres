@@ -54,7 +54,7 @@ export function createColourPicker({ getDeck, getAppearance }) {
     button.dataset.colour = colour
     button.title = `${label} ${colour.toUpperCase()}`
     button.setAttribute('aria-label', button.title)
-    button.setAttribute('aria-pressed', String(target.value.toLowerCase() === colour))
+    button.setAttribute('aria-pressed', String(target.dataset.mixed !== 'true' && target.value.toLowerCase() === colour))
     button.style.setProperty('--swatch', colour)
     const rgb = [1, 3, 5].map(i => Number.parseInt(colour.slice(i, i + 2), 16))
     const linear = rgb.map(value => {
@@ -137,9 +137,10 @@ export function createColourPicker({ getDeck, getAppearance }) {
 
   function sync() {
     fillButton.disabled = fill.disabled
+    fillButton.dataset.mixed = fill.dataset.mixed ?? 'false'
     const colour = /^#[0-9a-f]{6}$/i.test(fill.value) ? fill.value : '#ffffff'
     fillButton.style.backgroundColor = colour
-    fillButton.querySelector('svg').style.visibility = fill.value === 'none' || !fill.value ? 'visible' : 'hidden'
+    fillButton.querySelector('svg').style.visibility = fill.dataset.mixed !== 'true' && (fill.value === 'none' || !fill.value) ? 'visible' : 'hidden'
     if (target?.disabled) close(false)
   }
   sync()

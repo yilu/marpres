@@ -89,6 +89,8 @@ Choose **Layers** in the right inspector to select covered objects from a front-
 
 Click a colour control to choose from the deck's theme colours or 24 fixed swatches. Text, shape outlines, fills and theme settings share the same palette. **More colours…** retains the native custom picker; fills also offer **No fill**. Theme choices remain a preview until **Apply to deck**.
 
+Select several text objects to change their font, size, colour, emphasis or text alignment together. Several shapes share line, fill, width and rotation controls. Fields with different values show **Mixed**; only the property you change is applied to every selected object. Each batch is one undo step, with selection, geometry and text drafts preserved.
+
 ### Source, text, and history
 
 The horizontal toolbar formats whole text blocks. The text editor has separate buttons for formatting selected words. Math and Markdown remain in the source. Text drafts survive selection changes; Preview, Present, and PDF export save valid drafts first and stop for unresolved conflicts.

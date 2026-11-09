@@ -132,12 +132,16 @@ button:disabled { opacity: .35; }
 .colour-picker .colour-none { width: 100%; justify-content: flex-start; margin-top: 10px; }
 .horizontal-form .colour-fill-trigger { flex: none; width: 30px; height: 28px; min-height: 0; padding: 4px; border-color: var(--border); }
 .colour-fill-trigger .icon { color: #b8361f; }
+.colour-mixed-label { display: none; color: #596774; font-size: 11px; }
+input[data-mixed='true'] + .colour-mixed-label { display: inline; }
+input[type='color'][data-mixed='true']::-webkit-color-swatch, .colour-fill-trigger[data-mixed='true'] { background: linear-gradient(to bottom, #ffffff 44%, #596774 44%, #596774 56%, #ffffff 56%) !important; }
 #font-family { width: 215px; text-overflow: ellipsis; }
 .horizontal-form select { width: 106px; font-size: 11px; }
 .toolbar-divider { height: 20px; border-left: 1px solid var(--border); margin: 0 2px; }
 .horizontal-form .format-toggle { position: relative; width: 28px; height: 28px; justify-content: center; color: var(--ink); cursor: pointer; border-radius: 5px; }
 .format-toggle input { position: absolute; opacity: 0; width: 28px; height: 28px; inset: 0; margin: 0; cursor: pointer; }
 .format-toggle:has(input:checked) { color: #6748c3; background: #eae3fa; }
+.format-toggle:has(input:indeterminate)::after { content: ''; position: absolute; bottom: 3px; left: 9px; width: 10px; height: 2px; background: currentColor; pointer-events: none; }
 .format-toggle:has(input:focus-visible) { outline: 2px solid var(--accent); }
 .format-toggle:has(input:disabled) { opacity: .4; cursor: default; }
 #shape-form [name='fill'] { width: 95px; }

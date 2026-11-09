@@ -28,9 +28,12 @@ const sourceObject = object => state.deck?.objects?.find(item => item.id === obj
 const isText = object => ['box', 'caption', 'ref'].includes(object?.dataset.editKind)
 const canMutate = () => !state.presenting && !!state.deck && !state.busy && !state.conflict && !state.invalid && !state.gesture && !state.nudge && !state.cropping
 const textStyleKeys = ['font_family', 'bold', 'italic', 'underline', 'strike', 'color', 'align']
+const shapeStyleKeys = ['rotate', 'stroke', 'stroke_width', 'fill']
 const textDrafts = new Map()
 const selectedIds = () => state.selection.map(object => object.dataset.editId)
 const multiple = () => state.selection.length > 1
+const textSelection = () => state.selection.length > 0 && state.selection.every(isText)
+const shapeSelection = () => state.selection.length > 0 && state.selection.every(object => object.dataset.editKind === 'shape')
 const objectById = id => [...ui.deck.querySelectorAll('[data-edit-id]')].find(object => object.dataset.editId === id)
 const canonicalText = value => value.replace(/\r\n/g, '\n').replace(/\n+$/, '')
 const isFree = object => object?.dataset.editKind === 'shape' || optionsOf(object).position === 'absolute'
@@ -144,8 +147,11 @@ function updateControls() {
   ui.reload.disabled = state.cropping
   themePanel.sync(state.page)
   notesPanel.sync()
-  for (const element of document.querySelectorAll('#style-form input, #style-form select, #style-form button, #shape-form input, #shape-form button, #font-field input, #toolbar-crop, #delete-image')) element.disabled = unavailable || multiple()
+  for (const element of ui.styles.querySelectorAll('input, select, button')) element.disabled = unavailable || multiple() && !textSelection()
+  for (const element of ui.shape.querySelectorAll('input, button')) element.disabled = unavailable || multiple() && !shapeSelection()
+  for (const element of document.querySelectorAll('#toolbar-crop, #delete-image, #delete-shape')) element.disabled = unavailable || multiple()
   if (multiple()) for (const element of document.querySelectorAll('#geometry-form input, #geometry-form button, #content-form button, #content-form textarea, #crop-form button, #stage-form input, #stage-form button, #reset-position')) element.disabled = true
+  ui.geometry.elements.font.disabled = unavailable || !textSelection()
   for (const element of document.querySelectorAll('#insert-image, #shape-menu-toggle, [data-slide-action], #slide-title, #play, #present, #export-pdf')) element.disabled = !canMutate()
   for (const element of document.querySelectorAll('[data-distribute]')) element.disabled = unavailable || state.selection.length < 3
   for (const element of document.querySelectorAll('[data-slide-action]')) {
@@ -225,6 +231,12 @@ async function mutate(path, body, id = multiple() ? selectedIds() : state.select
 
 function save(patch, id = state.selected?.dataset.editId) {
   if (id && Object.keys(patch).length) return mutate('/api/edit', { id, patch }, id)
+}
+
+function saveFormatting(patch) {
+  if (!editable() || !Object.keys(patch).length) return
+  if (!multiple()) return save(patch)
+  if (textSelection() || shapeSelection()) return batchPositions(state.selection.map(object => ({ id: object.dataset.editId, patch })), 'Selection formatted')
 }
 
 async function history(direction) {
@@ -405,9 +417,16 @@ function setSelection(objects) {
   if (multiple()) {
     $('#object-label').textContent = `${selected.length} objects selected`
     $('#object-kind').textContent = 'Drag together · Shift-click to adjust selection'
-    ui.styles.hidden = ui.shape.hidden = ui.content.hidden = ui.crop.hidden = true
+    ui.styles.hidden = !textSelection()
+    ui.shape.hidden = !shapeSelection()
+    ui.content.hidden = ui.crop.hidden = true
     $('#geometry-form').hidden = $('#stage-form').hidden = true
     $('#figure-toolbar').hidden = true
+    if (textSelection() || shapeSelection()) {
+      $('#format-hint').hidden = true
+      $('#object-kind').textContent = 'Shared formatting · Shift-click to adjust selection'
+      refreshSharedFormatting()
+    }
   } else {
     $('#geometry-form').hidden = $('#stage-form').hidden = false
     $('#figure-toolbar').hidden = !figure
@@ -424,6 +443,60 @@ function select(object, extend = false) {
   if (selected.includes(object)) selected.splice(selected.indexOf(object), 1)
   else if (object) selected.push(object)
   setSelection(selected)
+}
+
+function textStyles(object) {
+  const options = optionsOf(object), computed = getComputedStyle(object)
+  const colour = computed.color.match(/[\d.]+/g)?.slice(0, 3).map(value => Math.round(Number(value)).toString(16).padStart(2, '0')).join('')
+  return {
+    font: options.font ?? parseFloat(computed.fontSize),
+    font_family: options.font_family ?? computed.fontFamily.replace(/["']/g, ''),
+    bold: options.bold ?? (Number(computed.fontWeight) >= 600 || computed.fontWeight === 'bold'),
+    italic: options.italic ?? computed.fontStyle === 'italic',
+    underline: options.underline ?? computed.textDecorationLine.includes('underline'),
+    strike: options.strike ?? computed.textDecorationLine.includes('line-through'),
+    color: (options.color ?? (colour ? `#${colour}` : '#000000')).toLowerCase(),
+    align: options.align ?? ({ start: 'left', end: 'right' }[computed.textAlign] ?? computed.textAlign)
+  }
+}
+
+function shapeStyles(object) {
+  const options = optionsOf(object)
+  return { rotate: options.rotate ?? 0, stroke: options.stroke ?? '#7a005f', stroke_width: options.stroke_width ?? 3, fill: options.fill ?? 'none' }
+}
+
+function commonField(field, values) {
+  const mixed = values.some(value => value !== values[0])
+  field.dataset.mixed = String(mixed)
+  field.dataset.originalTitle ??= field.title
+  field.dataset.originalPlaceholder ??= field.placeholder ?? ''
+  field.title = mixed ? 'Mixed values' : field.dataset.originalTitle
+  field.setAttribute('aria-description', mixed ? 'Mixed values across the selected objects' : '')
+  if (field.type === 'checkbox') {
+    field.checked = !mixed && values[0]
+    field.indeterminate = mixed
+    return field.checked
+  }
+  if (field.tagName === 'SELECT' && !field.querySelector('option[value=""]')) {
+    const option = new Option('Mixed', '')
+    option.disabled = true
+    field.prepend(option)
+  }
+  field.value = mixed && field.type !== 'color' ? '' : values[0]
+  if ('placeholder' in field) field.placeholder = mixed ? 'Mixed' : field.dataset.originalPlaceholder
+  return field.value
+}
+
+function refreshSharedFormatting() {
+  if (textSelection()) {
+    const styles = state.selection.map(textStyles)
+    for (const key of textStyleKeys) state.inspector.styles[key] = commonField(ui.styles.elements[key], styles.map(style => style[key]))
+    state.inspector.font = commonField(ui.geometry.elements.font, styles.map(style => style.font))
+  } else if (shapeSelection()) {
+    const styles = state.selection.map(shapeStyles)
+    state.inspector.shape = Object.fromEntries(shapeStyleKeys.map(key => [key, commonField(ui.shape.elements[key], styles.map(style => style[key]))]))
+    state.inspector.shapeDirty = new Set()
+  }
 }
 
 function refreshInspector() {
@@ -457,29 +530,19 @@ function refreshInspector() {
   ui.styles.hidden = !text
   ui.content.hidden = !text
   if (text) {
-    const colour = computed.color.match(/[\d.]+/g)?.slice(0, 3).map(value => Math.round(Number(value)).toString(16).padStart(2, '0')).join('')
-    const values = {
-      font_family: options.font_family ?? computed.fontFamily.replace(/["']/g, ''),
-      bold: options.bold ?? (Number(computed.fontWeight) >= 600 || computed.fontWeight === 'bold'),
-      italic: options.italic ?? computed.fontStyle === 'italic',
-      underline: options.underline ?? computed.textDecorationLine.includes('underline'),
-      strike: options.strike ?? computed.textDecorationLine.includes('line-through'),
-      color: options.color ?? (colour ? `#${colour}` : '#000000'),
-      align: options.align ?? ({ start: 'left', end: 'right' }[computed.textAlign] ?? computed.textAlign)
-    }
-    for (const [key, value] of Object.entries(values)) {
-      const field = ui.styles.elements[key]
-      if (field.type === 'checkbox') field.checked = value
-      else field.value = value
-      state.inspector.styles[key] = field.type === 'checkbox' ? field.checked : field.value
-    }
+    const values = textStyles(object)
+    for (const key of textStyleKeys) state.inspector.styles[key] = commonField(ui.styles.elements[key], [values[key]])
+    state.inspector.font = commonField(ui.geometry.elements.font, [values.font])
     const source = sourceObject(object)
     ui.text.value = textDrafts.get(source?.id)?.value ?? source?.content ?? ''
     refreshDraftNotice()
   }
   $('#object-stage').value = options.stage ?? 0
   ui.shape.hidden = !shape
-  if (shape) for (const [key, value] of Object.entries({ rotate: options.rotate ?? 0, stroke: options.stroke ?? '#7a005f', stroke_width: options.stroke_width ?? 3, fill: options.fill ?? 'none' })) ui.shape.elements[key].value = value
+  if (shape) {
+    state.inspector.shape = Object.fromEntries(Object.entries(shapeStyles(object)).map(([key, value]) => [key, commonField(ui.shape.elements[key], [value])]))
+    state.inspector.shapeDirty = new Set()
+  }
   ui.crop.hidden = !figure
   if (figure) ['left', 'top', 'width', 'height'].forEach((key, index) => { ui.crop.elements[key].value = (options.crop ?? [0, 0, 100, 100])[index] })
 }
@@ -709,10 +772,10 @@ ui.styles.addEventListener('submit', event => {
     const value = field.type === 'checkbox' ? field.checked : field.value.trim()
     if (value !== state.inspector.styles[key]) patch[key] = value === '' ? null : value
   }
-  if (Object.keys(patch).length) save(patch)
+  if (Object.keys(patch).length) saveFormatting(patch)
   else status('Text style is unchanged')
 })
-$('#reset-text-style').addEventListener('click', () => { if (editable()) save(Object.fromEntries(['font', ...textStyleKeys].map(key => [key, null]))) })
+$('#reset-text-style').addEventListener('click', () => { if (textSelection()) saveFormatting(Object.fromEntries(['font', ...textStyleKeys].map(key => [key, null]))) })
 ui.content.addEventListener('submit', event => {
   event.preventDefault()
   if (!editable() || !sourceObject(state.selected)?.contentEditable || $('#save-content').disabled) return
@@ -778,7 +841,19 @@ $('#insert-text').addEventListener('click', async () => {
 })
 ui.shape.addEventListener('submit', event => {
   event.preventDefault()
-  if (editable()) save({ rotate: Number(ui.shape.elements.rotate.value), stroke: ui.shape.elements.stroke.value, stroke_width: Number(ui.shape.elements.stroke_width.value), fill: ui.shape.elements.fill.value.trim() || 'none' })
+  if (!editable() || !shapeSelection()) return
+  const patch = {}
+  for (const key of shapeStyleKeys) {
+    const value = ui.shape.elements[key].value.trim()
+    if (multiple() && value === state.inspector.shape[key] && !state.inspector.shapeDirty.has(key)) continue
+    patch[key] = key === 'fill' ? value || 'none' : ['rotate', 'stroke_width'].includes(key) ? value === '' ? null : Number(value) : value
+  }
+  saveFormatting(patch)
+})
+ui.shape.addEventListener('change', event => {
+  if (!multiple() || !shapeSelection() || !shapeStyleKeys.includes(event.target.name)) return
+  state.inspector.shapeDirty.add(event.target.name)
+  event.target.dataset.mixed = 'false'
 })
 async function deleteObject() {
   if (multiple()) { status('Select one object to delete it.'); return }
@@ -1040,8 +1115,12 @@ document.addEventListener('focusin', event => {
 })
 for (const toggle of ui.styles.querySelectorAll('.format-toggle')) toggle.addEventListener('mousedown', event => event.preventDefault())
 ui.styles.addEventListener('change', event => {
-  if (!editable() || multiple()) return
+  if (!editable() || !textSelection()) return
   const field = event.target
+  if (multiple()) {
+    if (textStyleKeys.includes(field.name)) saveFormatting({ [field.name]: field.type === 'checkbox' ? field.checked : field.value.trim() || null })
+    return
+  }
   if (editingWords && formats[field.name] && ui.text.selectionEnd > ui.text.selectionStart) {
     const button = document.querySelector(`[data-format="${field.name}"]`)
     button.click()
@@ -1049,9 +1128,9 @@ ui.styles.addEventListener('change', event => {
   } else ui.styles.requestSubmit()
 })
 ui.geometry.elements.font.addEventListener('change', () => {
-  if (!editable() || multiple()) return
+  if (!editable() || !textSelection()) return
   const value = ui.geometry.elements.font.value
-  if (value !== state.inspector.font) save({ font: value === '' ? null : Number(value) })
+  if (value !== state.inspector.font) saveFormatting({ font: value === '' ? null : Number(value) })
 })
 $('#toolbar-crop').addEventListener('click', startDirectCrop)
 for (const id of ['#toggle-inspector', '#inspector-toggle']) $(id).addEventListener('click', () => document.body.classList.toggle('inspector-collapsed'))
