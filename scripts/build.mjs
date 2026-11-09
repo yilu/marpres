@@ -1,15 +1,13 @@
-import { mkdir,writeFile } from 'node:fs/promises'
 import { resolve,basename } from 'node:path'
 import { chromium } from 'playwright-chromium'
-import { renderFile,documentHTML } from './render.mjs'
+import { exportHTML } from './html-export.mjs'
 import { preparePrintPage } from './print.mjs'
-const file=resolve(process.argv[2]||'slides/demo.md')
-const deck=await renderFile(file)
+const args=process.argv.slice(2)
+const file=resolve(args.find(arg=>!arg.startsWith('--'))||'slides/demo.md')
+const stem=basename(file,'.md'),html=resolve(`dist/${stem}.html`),pdf=resolve(`dist/${stem}.pdf`)
+const {deck}=await exportHTML(file,{output:html,embedImages:args.includes('--embed-images'),linkImages:args.includes('--link-images')})
 for(const d of deck.diagnostics)console.error(`${d.severity}: slide ${d.slide||'?'}: ${d.message}`)
 if(deck.diagnostics.some(d=>d.severity==='error'))process.exit(1)
-await mkdir('dist',{recursive:true})
-const stem=basename(file,'.md'),html=resolve(`dist/${stem}.html`),pdf=resolve(`dist/${stem}.pdf`)
-await writeFile(html,documentHTML(deck,stem))
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true})
 try {
  const page=await browser.newPage()

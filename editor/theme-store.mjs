@@ -41,12 +41,12 @@ export function applyDeckDesign(source, input) {
   return prefix + (prefix && !prefix.endsWith('\n') ? eol : '') + block + source.slice(position)
 }
 
-function appearanceDirectives(source, slide) {
-  const mapping = mapSource(source), target = mapping.slides[slide - 1]
+function appearanceDirectives(source, slide, context) {
+  const mapping = context?.mapping ?? mapSource(source), target = mapping.slides[slide - 1]
   if (!Number.isInteger(slide) || !target) fail('Slide does not exist.')
-  const offsets = offsetsOf(source), directives = []
+  const offsets = context?.offsets ?? offsetsOf(source), directives = []
   const start = offsets[target.startLine], end = Math.min(source.length, offsets[target.endLine])
-  for (const token of parser.parse(maskFrontMatter(source), {})) {
+  for (const token of context?.tokens ?? parser.parse(maskFrontMatter(source), {})) {
     if (token.type !== 'html_block' || !token.map) continue
     const tokenStart = offsets[token.map[0]]
     if (tokenStart < start || tokenStart >= end) continue
@@ -67,6 +67,16 @@ function appearanceDirectives(source, slide) {
     }
   }
   return { target, offsets, directives }
+}
+
+// Share the source map and Markdown parse when building a complete deck response.
+export function getSlideAppearances(source, mapping = mapSource(source)) {
+  const context = { mapping, offsets: offsetsOf(source), tokens: parser.parse(maskFrontMatter(source), {}) }
+  return mapping.slides.map(({ slide }) => {
+    const { directives } = appearanceDirectives(source, slide, context)
+    const value = directives.at(-1)?.value || 'inherit'
+    return ['light', 'dark'].includes(value) ? value : 'inherit'
+  })
 }
 
 export function getSlideAppearance(source, slide) {

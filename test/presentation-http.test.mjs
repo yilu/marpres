@@ -73,3 +73,29 @@ test('presenter routes serve explicit assets and malformed notes never write the
   assert.equal((await post('/api/notes', { hash: deck.hash, slide: 1, notes: 'Bad --> text' })).status, 400)
   assert.equal(await readFile(file, 'utf8'), source)
 })
+
+test('server snapshots retain exact image bytes across source and image changes', async t => {
+  const { app, file, post } = await fixture(t)
+  const image = join(file, '..', 'plot.svg')
+  const original = '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0L3840 2160"/></svg>'
+  await writeFile(image, original)
+  await writeFile(file, source + '\n![plot](plot.svg)\n')
+  const deck = await (await fetch(app.url + '/api/deck')).json()
+  const created = await (await post('/api/presentation', { hash: deck.hash, slide: 1 })).json()
+  const key = new URL(created.presenterUrl, app.url).hash.slice(5)
+  const snapshots = []
+  for (const role of ['audience', 'presenter']) {
+    const url = app.url + `/api/presentation/${created.id}?role=${role}`
+    snapshots.push({ url, headers: role === 'presenter' ? { 'X-Presenter-Key': key } : {}, snapshot: await (await fetch(url, { headers: role === 'presenter' ? { 'X-Presenter-Key': key } : {} })).json() })
+  }
+  const oldURL = snapshots[0].snapshot.html.match(/\/api\/assets\/[a-f\d]{64}/)[0]
+  assert.equal(snapshots[1].snapshot.html, snapshots[0].snapshot.html)
+  await writeFile(image, '<svg xmlns="http://www.w3.org/2000/svg"><circle r="100"/></svg>')
+  await writeFile(file, '# Changed source\n\n![plot](plot.svg)\n')
+  const changed = await (await fetch(app.url + '/api/deck')).json()
+  assert.notEqual(changed.html.match(/\/api\/assets\/[a-f\d]{64}/)[0], oldURL)
+  for (const { url, headers, snapshot } of snapshots) assert.deepEqual(await (await fetch(url, { headers })).json(), snapshot)
+  const response = await fetch(app.url + oldURL)
+  assert.equal(await response.text(), original)
+  assert.match(response.headers.get('cache-control'), /immutable/)
+})

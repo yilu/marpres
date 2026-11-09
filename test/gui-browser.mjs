@@ -249,7 +249,10 @@ try {
   const inserted = await saved(() => page.locator('[data-shape="heart"]').click())
   assert.equal((await options(inserted.selectedId)).shape, 'heart')
   await saved(() => page.click('#bring-front'))
-  assert.ok((await options(inserted.selectedId)).layer > 1)
+  const frontmost = await page.locator('#deck .current-slide .editable-object').evaluateAll(objects =>
+    objects.sort((a, b) => Number(getComputedStyle(a).zIndex) - Number(getComputedStyle(b).zIndex) ||
+      (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1)).at(-1).dataset.editId)
+  assert.equal(frontmost, inserted.selectedId, 'Bring front changes painted stacking order, without requiring ever-growing layer numbers')
   await saved(() => page.click('#delete-shape'))
   const insertedText = await saved(() => page.click('#insert-text'))
   assert.equal(await text.evaluate(element => document.activeElement === element), true)

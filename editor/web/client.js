@@ -2,6 +2,7 @@ import { createCropEditor } from './crop-editor.js'
 import { createSourcePane } from './source-pane.js'
 import { createThemePanel } from './theme-panel.js'
 import { createNotesPanel } from './notes-panel.js'
+import { createLayersPanel } from './layers.js'
 
 const $ = selector => document.querySelector(selector)
 const ui = {
@@ -35,6 +36,9 @@ const isFree = object => object?.dataset.editKind === 'shape' || optionsOf(objec
 const owningPanel = object => object && !isFree(object) ? object.closest('.panel') : null
 let arrangementSelection = ''
 let insertionPage = -1
+let shiftClick = null
+let navigatorSlides = []
+let navigatorCSS = null
 
 function refreshInsertionTargets() {
   const target = $('#insertion-target')
@@ -150,6 +154,7 @@ function updateControls() {
   for (const element of document.querySelectorAll('#zoom-level, #zoom-fit, #zoom-in, #zoom-out')) element.disabled = state.cropping || !!state.gesture || !!state.nudge
   updateAlignmentControls()
   $('#insertion-target').disabled = !canMutate()
+  layersPanel.sync()
 }
 
 
@@ -248,15 +253,18 @@ async function render(data, selectedId) {
   $('#deck-style').textContent = data.css
   ui.deck.innerHTML = data.html
   for (const title of ui.deck.querySelectorAll('.deck-heading > h1')) title.title = 'Double-click to edit slide title'
-  const images = [...ui.deck.querySelectorAll('img')]
-  await Promise.all(images.map(image => image.decode?.().catch(() => {})))
-  await document.fonts.ready
+  // Capture pristine markup before selection, stages, or Marp runtime changes it.
+  const thumbnailSources = slides().map(slide => slide.outerHTML.replace(/ data-source-(?:end-)?line="[^"]*"/g, ''))
   const count = slides().length
   state.page = Math.max(0, Math.min(data.selectedSlide ? data.selectedSlide - 1 : state.page, count - 1))
   const ids = (Array.isArray(selectedId) ? selectedId : [selectedId]).filter(Boolean)
   const first = objectById(ids[0])
   if (first && !data.selectedSlide) state.page = slides().indexOf(first.closest('.marpit > svg'))
-  refreshNavigator()
+  // Other slides load normally; only the displayed slide must finish decoding
+  // before inspector geometry and the crop editor can use it.
+  await Promise.all([...currentSlide()?.querySelectorAll('img') ?? []].map(image => image.decode?.().catch(() => {})))
+  await document.fonts.ready
+  refreshNavigator(thumbnailSources)
   sourcePane.render()
   showPage(state.page)
   setSelection(ids.map(objectById).filter(object => object?.closest('.current-slide')))
@@ -481,7 +489,7 @@ function startGesture(event, resizing) {
   const frame = frameOf(object)
   const rect = stageRect(frame)
   const shape = object.dataset.editKind === 'shape'
-  state.gesture = { object, id: object.dataset.editId, dx: options.dx ?? 0, dy: options.dy ?? 0, rotate: options.rotate ?? 0, left: rect.left, top: rect.top, width: shape ? frame.offsetWidth : rect.width, height: shape ? frame.offsetHeight : rect.height, patch: null }
+  state.gesture = { object, id: object.dataset.editId, dx: options.dx ?? 0, dy: options.dy ?? 0, rotate: options.rotate ?? 0, left: rect.left, top: rect.top, width: shape ? frame.offsetWidth : rect.width, height: shape ? frame.offsetHeight : rect.height, pointerStart: [event.clientX, event.clientY], patch: null }
   state.alt = !!event.inputEvent?.altKey
   updateSnapping()
   updateHistory()
@@ -491,6 +499,22 @@ function startGesture(event, resizing) {
     event.setOrigin(shape ? ['50%', '50%'] : ['0%', '0%'])
     event.dragStart?.set([0, 0])
   } else event.set([0, 0])
+}
+
+function constrainDrag(event, translation) {
+  const gesture = state.gesture
+  const pointer = [event.clientX - gesture.pointerStart[0], event.clientY - gesture.pointerStart[1]]
+  const moved = Math.hypot(...pointer) >= 3
+  if (shiftClick && moved) shiftClick.dragged = true
+  if (!event.inputEvent?.shiftKey) {
+    gesture.axis = null
+    return translation
+  }
+  // Choose from the pointer, not snapped coordinates, and keep the axis until
+  // Shift is released. Project after snapping so guides cannot move the other axis.
+  if (!gesture.axis && moved) gesture.axis = Math.abs(pointer[0]) >= Math.abs(pointer[1]) ? 'x' : 'y'
+  if (!gesture.axis) return [0, 0]
+  return gesture.axis === 'x' ? [translation[0], 0] : [0, translation[1]]
 }
 
 function preview(patch, object = state.selected) {
@@ -558,6 +582,7 @@ const cropEditor = createCropEditor({
 })
 
 function startDirectCrop() {
+  layersPanel.showFormat()
   if (!canMutate() || state.selected?.dataset.editKind !== 'figure') return
   if (!cropEditor.begin(state.selected, frameOf(state.selected))) status('The image must finish loading before it can be cropped.', 'error')
 }
@@ -568,7 +593,7 @@ moveable.on('dragStart', event => startGesture(event, false))
 moveable.on('drag', event => {
   const gesture = state.gesture
   if (!gesture) return
-  const [x, y] = event.beforeTranslate
+  const [x, y] = constrainDrag(event, event.beforeTranslate)
   gesture.patch = { dx: round(gesture.dx + x), dy: round(gesture.dy + y) }
   preview(gesture.patch, gesture.object)
 })
@@ -613,16 +638,32 @@ moveable.on('rotate', event => {
 moveable.on('rotateEnd', finishGesture)
 
 ui.deck.addEventListener('pointerdown', event => {
+  shiftClick = null
   if (state.presenting || state.space || state.panning || state.busy || state.conflict || state.cropping || state.gesture || state.nudge || event.button !== 0) return
   const object = event.target.closest('.editable-object[data-edit-id]')
   if (!object) return
-  if (event.shiftKey) select(object, true)
+  if (event.shiftKey) {
+    // Delay removal until a click is known to be a click: the same selected
+    // object may be the start of an axis-constrained single or group drag.
+    shiftClick = { object, wasSelected: state.selection.includes(object), dragged: false }
+    if (!shiftClick.wasSelected) select(object, true)
+  }
   else if (!state.selection.includes(object)) select(object)
 })
 ui.deck.addEventListener('mousedown', event => {
-  if (editable() && !event.shiftKey && !state.space && !state.panning && state.selection.includes(event.target.closest('.editable-object')) && !moveable.isMoveableElement(event.target)) moveable.dragStart(event)
+  if (editable() && !state.space && !state.panning && state.selection.includes(event.target.closest('.editable-object')) && !moveable.isMoveableElement(event.target)) {
+    // Flush both the target change and the manager's queued geometry update.
+    // Otherwise an old state snapshot can clear dragInfo during a new gesture.
+    moveable.forceUpdate()
+    moveable.getManager().forceUpdate()
+    moveable.dragStart(event)
+  }
 })
-ui.deck.addEventListener('click', event => { if (event.target.closest('a')) event.preventDefault() })
+ui.deck.addEventListener('click', event => {
+  if (event.target.closest('a')) event.preventDefault()
+  if (shiftClick?.wasSelected && !shiftClick.dragged && canMutate()) select(shiftClick.object, true)
+  shiftClick = null
+})
 ui.deck.addEventListener('dblclick', event => {
   if (event.target.closest('.deck-heading > h1') && canMutate() && !state.space && !state.panning) {
     select(null)
@@ -826,10 +867,11 @@ document.addEventListener('keydown', event => {
 })
 document.addEventListener('keyup', event => {
   state.alt = event.altKey
+  if (event.key === 'Shift' && state.gesture) state.gesture.axis = null
   updateSnapping()
   if (event.key.startsWith('Arrow')) flushNudge()
 })
-window.addEventListener('blur', () => { state.alt = false; updateSnapping(); flushNudge() })
+window.addEventListener('blur', () => { state.alt = false; shiftClick = null; if (state.gesture) state.gesture.axis = null; updateSnapping(); flushNudge() })
 window.addEventListener('beforeunload', event => {
   if (textDrafts.size || notesPanel.hasDrafts()) { event.preventDefault(); event.returnValue = '' }
 })
@@ -849,8 +891,11 @@ setInterval(async () => {
 function slideTitle(index) {
   return state.deck?.slides?.find(item => item.slide === index + 1)?.title || slides()[index]?.querySelector('h1')?.textContent || `Slide ${index + 1}`
 }
-function refreshNavigator() {
-  $('#slide-list').replaceChildren(...slides().map((slide, index) => {
+function refreshNavigator(sources) {
+  const list = $('#slide-list'), previous = [...list.children]
+  const sameCSS = navigatorCSS === state.deck.css
+  const buttons = slides().map((slide, index) => {
+    if (sameCSS && sources[index] === navigatorSlides[index] && previous[index]) return previous[index]
     const button = document.createElement('button')
     button.className = 'slide-item'
     button.type = 'button'
@@ -890,9 +935,23 @@ function refreshNavigator() {
     title.textContent = slideTitle(index)
     caption.append(number, title)
     button.append(preview, caption)
-    button.addEventListener('click', () => { if (canMutate()) showPage(index) })
+    button.addEventListener('click', () => {
+      if (!canMutate()) return
+      showPage(index)
+      button.focus({ preventScroll: true })
+    })
     return button
-  }))
+  })
+  // Leave retained buttons attached so focus, decoded images, and observers survive.
+  for (let index = 0; index < buttons.length; index++) {
+    if (list.children[index] !== buttons[index]) {
+      if (list.children[index]) list.children[index].replaceWith(buttons[index])
+      else list.append(buttons[index])
+    }
+  }
+  while (list.children.length > buttons.length) list.lastElementChild.remove()
+  navigatorSlides = sources
+  navigatorCSS = state.deck.css
   fitThumbnails()
 }
 function fitThumbnails() {
@@ -902,6 +961,17 @@ function refreshNavigatorSelection() {
   for (const button of document.querySelectorAll('.slide-item')) button.setAttribute('aria-selected', String(Number(button.dataset.slide) === state.page + 1))
   $('#slide-title').value = slideTitle(state.page)
 }
+$('#slide-list').addEventListener('keydown', event => {
+  if (!event.target.closest('.slide-item') || !['ArrowDown', 'ArrowUp'].includes(event.key)) return
+  if (event.target.matches('input, textarea, select') || event.target.isContentEditable) return
+  event.preventDefault()
+  event.stopPropagation()
+  if (!canMutate()) return
+  showPage(state.page + (event.key === 'ArrowDown' ? 1 : -1))
+  const selected = $('#slide-list .slide-item[aria-selected="true"]')
+  selected?.focus({ preventScroll: true })
+  selected?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+})
 for (const button of document.querySelectorAll('[data-slide-action]')) button.addEventListener('click', async () => {
   if (!canMutate() || !await notesPanel.savePending()) return
   closeShapes()
@@ -1033,19 +1103,11 @@ function distributeSelection(direction) {
   })
   batchPositions(edits, 'Spacing distributed')
 }
-async function arrangeLayer(front) {
-  if (!editable()) return
-  const all = [...currentSlide().querySelectorAll('.editable-object')]
-  const layers = all.map(object => optionsOf(object).layer ?? (isText(object) && optionsOf(object).position === 'absolute' ? 1 : 0))
-  const edge = front ? Math.max(...layers) + 1 : Math.min(...layers) - 1
-  if (edge < -99 || edge > 99) { status('This selection has reached the available layer limit.', 'error'); return }
-  await batchPositions(state.selection.map(object => ({ id: object.dataset.editId, patch: { layer: edge } })), front ? 'Brought to front' : 'Sent to back')
-}
-$('#bring-front').addEventListener('click', () => arrangeLayer(true))
-$('#send-back').addEventListener('click', () => arrangeLayer(false))
 moveable.on('dragGroupStart', event => {
   if (!editable() || state.nudge || state.space || state.panning) return false
-  state.gesture = { group: state.selection.map(object => ({ object, id: object.dataset.editId, dx: optionsOf(object).dx ?? 0, dy: optionsOf(object).dy ?? 0 })), patch: null }
+  state.gesture = { group: state.selection.map(object => ({ object, id: object.dataset.editId, dx: optionsOf(object).dx ?? 0, dy: optionsOf(object).dy ?? 0 })), pointerStart: [event.clientX, event.clientY], patch: null }
+  state.alt = !!event.inputEvent?.altKey
+  updateSnapping()
   for (const item of event.events) item.set([0, 0])
   updateControls(); updateHistory()
 })
@@ -1054,12 +1116,24 @@ moveable.on('dragGroup', event => {
   for (const item of event.events) {
     const member = state.gesture.group.find(member => frameOf(member.object) === item.target)
     if (!member) continue
-    member.patch = { dx: round(member.dx + item.beforeTranslate[0]), dy: round(member.dy + item.beforeTranslate[1]) }
+    // Rotated groups have their own transform origin. Keep each member's
+    // translation, constraining all members to the same pointer-chosen axis.
+    const [x, y] = constrainDrag(event, item.beforeTranslate)
+    member.patch = { dx: round(member.dx + x), dy: round(member.dy + y) }
     preview(member.patch, member.object)
   }
   state.gesture.patch = true
 })
 moveable.on('dragGroupEnd', finishGesture)
+moveable.on('clickGroup', event => {
+  // The group's drag surface intercepts clicks; Moveable resolves the object
+  // beneath it so Shift-click can still remove or add an individual member.
+  if (event.inputEvent?.shiftKey && canMutate()) {
+    const object = event.inputTarget?.closest('.editable-object[data-edit-id]')
+    if (object) select(object, true)
+  }
+  shiftClick = null
+})
 
 let marquee = null
 ui.workspace.addEventListener('pointerdown', event => {
@@ -1299,6 +1373,15 @@ $('#export-pdf').addEventListener('click', async () => {
 const sourcePane = createSourcePane({ getDeck: () => state.deck, getSelection: selectedIds, navigate: (slide, id) => { if (canMutate()) { showPage(slide - 1); if (id) select(objectById(id)) } } })
 const themePanel = createThemePanel({ getDeck: () => state.deck, canMutate, mutate, report: status })
 const notesPanel = createNotesPanel({ getDeck: () => state.deck, getPage: () => state.page, canMutate, mutate, navigate: showPage, report: status })
+const layersPanel = createLayersPanel({
+  getSlide: currentSlide, getSelection: selectedIds, canSelect: canMutate,
+  selectObject: (object, extend) => {
+    if (object.closest('.stage-hidden')) { state.stage = 'all'; refreshStages() }
+    select(object, extend)
+  },
+  saveEdits: batchPositions, report: status
+})
+
 
 await loadShapes()
 

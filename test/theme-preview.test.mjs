@@ -37,7 +37,9 @@ test('theme preview renders proposed settings without changing source, history o
   assert.match(preview.css, /--deck-title-size:\s*65px/)
   assert.match(preview.css, /--deck-title-dx:\s*33px/)
   assert.match(preview.css, /color:\s*#123456/)
-  assert.match(preview.html, /data:image\/svg\+xml;base64,/)
+  assert.doesNotMatch(preview.html, /data:image\/svg\+xml;base64,/)
+  const assetURL = preview.html.match(/\/api\/assets\/[a-f\d]{64}/)[0]
+  assert.equal(await (await fetch(app.url + assetURL)).text(), await readFile(join(dir, 'plot.svg'), 'utf8'))
   assert.equal(await readFile(file, 'utf8'), source)
   assert.deepEqual({ undo: app.store.undoStack, redo: app.store.redoStack }, history)
   assert.deepEqual((await readdir(dir)).sort(), ['deck.md', 'plot.svg'])

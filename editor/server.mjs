@@ -1,10 +1,10 @@
 import http from 'node:http'
-import { randomBytes, timingSafeEqual } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
+import { readFile, stat } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { SourceStore, SourceError, mapSource } from './source-store.mjs'
-import { getDeckDesign, getSlideAppearance, applyDeckDesign, setSlideAppearance } from './theme-store.mjs'
+import { getDeckDesign, getSlideAppearances, applyDeckDesign, setSlideAppearance } from './theme-store.mjs'
 import { readNotes, patchNotes } from './notes.mjs'
 import { PresentationStore } from './presentation-store.mjs'
 
@@ -24,11 +24,10 @@ export async function jsonBody(request) {
   catch{throw new SourceError('The edit request must contain JSON.')}
 }
 
-export async function createDraftServer({ file, port = 3030, renderer, ui='gui' } = {}) {
+export async function createDraftServer({ file, port = 3030, renderer, exporter, ui='gui' } = {}) {
   if (!file) throw new Error('A deck Markdown file is required.')
   if(ui!=='gui')throw new Error('Unknown editor UI.')
   const store = new SourceStore(file)
-  const presentations = new PresentationStore(store)
   await store.read()
   const renderFile = renderer ?? (await import('../scripts/render.mjs')).renderFile
   const token = randomBytes(32).toString('hex')
@@ -38,11 +37,34 @@ export async function createDraftServer({ file, port = 3030, renderer, ui='gui' 
     serial = result.catch(() => {})
     return result
   }
+  // Keep PDF jobs sequential without blocking editor operations.
+  let exportSerial = Promise.resolve()
+  const enqueueExport = operation => {
+    const result = exportSerial.then(operation)
+    exportSerial = result.catch(() => {})
+    return result
+  }
+  const imageAssets = new Map()
+  const resolveAsset = (bytes, type) => {
+    const id=createHash('sha256').update(type).update(bytes).digest('hex')
+    if(!imageAssets.has(id))imageAssets.set(id,{bytes,type})
+    return `/api/assets/${id}`
+  }
+  const presentations = new PresentationStore(store, { resolveAsset })
+  const dependenciesChanged = async dependencies => {
+    for(const dependency of dependencies||[]) {
+      try {
+        const current=await stat(dependency.path)
+        if(current.mtimeMs!==dependency.mtimeMs||current.ctimeMs!==dependency.ctimeMs||current.size!==dependency.size)return true
+      } catch {return true}
+    }
+    return false
+  }
   let lastRendered
   const deck = async () => {
     const current = await store.read()
-    if (!lastRendered || lastRendered.hash !== current.hash) {
-      const rendered = await renderFile(store.file, { draft: true })
+    if (!lastRendered || lastRendered.hash !== current.hash || await dependenciesChanged(lastRendered.dependencies)) {
+      const rendered = await renderFile(store.file, { draft: true, resolveAsset })
       const latest = await store.read()
       if (rendered.hash !== latest.hash) throw store.conflict()
       lastRendered = rendered
@@ -50,9 +72,10 @@ export async function createDraftServer({ file, port = 3030, renderer, ui='gui' 
     const latest = await store.read()
     if (latest.hash !== lastRendered.hash) throw store.conflict()
     let editingError = null, objects=[], slides=[], design
-    try { const mapping=mapSource(latest.source),notes=readNotes(latest.source);objects=mapping.objects.map(({id,kind,content,contentEditable,slide,line,endLine})=>({id,kind,content,contentEditable,slide,line:line+1,endLine}));slides=mapping.slides.map(({slide,title,startLine,endLine})=>({slide,title,startLine:startLine+1,endLine,appearance:getSlideAppearance(latest.source,slide),notes:notes[slide-1]})) } catch (error) { editingError = error.message }
+    try { const mapping=mapSource(latest.source),notes=readNotes(latest.source),appearances=getSlideAppearances(latest.source,mapping);objects=mapping.objects.map(({id,kind,content,contentEditable,slide,line,endLine})=>({id,kind,content,contentEditable,slide,line:line+1,endLine}));slides=mapping.slides.map(({slide,title,startLine,endLine})=>({slide,title,startLine:startLine+1,endLine,appearance:appearances[slide-1],notes:notes[slide-1]})) } catch (error) { editingError = error.message }
     try{design=getDeckDesign(latest.source)}catch(error){design=getDeckDesign('');editingError=editingError||error.message}
-    return { ...lastRendered, history: latest.history, editingError, objects, slides, sourcePath:store.file, design, capabilities:{panelInsertion:true,themePreview:true,masterPositions:true,titleTypography:true,presenter:true,notes:true} }
+    const {dependencies,...renderedDeck}=lastRendered
+    return { ...renderedDeck, history: latest.history, editingError, objects, slides, sourcePath:store.file, design, capabilities:{panelInsertion:true,themePreview:true,masterPositions:true,titleTypography:true,presenter:true,notes:true} }
   }
   const respond = (response, status, value, type = 'application/json; charset=utf-8', extraHeaders={}) => {
     response.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', ...extraHeaders })
@@ -84,13 +107,15 @@ export async function createDraftServer({ file, port = 3030, renderer, ui='gui' 
         if (operation === 'presentation') return respond(response, 200, await enqueue(() => presentations.create(body)))
         if(operation==='theme-preview') {
           const {previewTheme}=await import('./theme-preview.mjs')
-          const preview=await enqueue(()=>previewTheme(store,body))
+          const preview=await enqueue(()=>previewTheme(store,body,{resolveAsset}))
           respond(response,200,preview)
           return
         }
         if(operation==='export') {
           const {exportDeckPDF}=await import('./media.mjs')
-          const {buffer,filename}=await enqueue(()=>exportDeckPDF(store,body))
+          // Export captures its own immutable snapshot and rechecks the source before returning.
+          // Chromium must not hold the editor queue while it prints that snapshot.
+          const {buffer,filename}=await enqueueExport(() => (exporter ?? exportDeckPDF)(store,body))
           respond(response,200,buffer,'application/pdf',{'Content-Disposition':`attachment; filename="deck.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}`})
           return
         }
@@ -105,6 +130,12 @@ export async function createDraftServer({ file, port = 3030, renderer, ui='gui' 
       const presentation = /^\/api\/presentation\/([a-f\d-]+)$/.exec(url.pathname)
       if (presentation) return respond(response, 200, presentations.get(presentation[1], url.searchParams.get('role'), request.headers['x-presenter-key']))
       if(url.pathname==='/api/shapes')return respond(response,200,{groups:(await import('../engine/shapes.mjs')).shapeGroups})
+      const imageAsset=/^\/api\/assets\/([a-f\d]{64})$/.exec(url.pathname)
+      if(imageAsset) {
+        const asset=imageAssets.get(imageAsset[1])
+        if(!asset)throw new SourceError('Not found.','NOT_FOUND',404)
+        return respond(response,200,asset.bytes,asset.type,{'Cache-Control':'public, max-age=31536000, immutable'})
+      }
       if (url.pathname === '/api/deck') return respond(response, 200, await enqueue(deck))
       if (url.pathname === '/api/status') {
         const { hash, history } = await store.read()

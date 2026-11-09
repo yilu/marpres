@@ -2,11 +2,11 @@ import { dirname } from 'node:path'
 import { applyDeckDesign } from './theme-store.mjs'
 import { renderSource } from '../scripts/render.mjs'
 
-export function previewTheme(store, { hash, theme, css }) {
+export function previewTheme(store, { hash, theme, css }, { resolveAsset } = {}) {
   return store.serialize(async () => {
     const snapshot = await store.guarded(hash)
     const proposed = applyDeckDesign(snapshot.source, { theme, css })
-    const rendered = await renderSource(proposed, { baseDir: dirname(store.file), draft: true })
+    const rendered = await renderSource(proposed, { baseDir: dirname(store.file), draft: true, resolveAsset })
     await store.guarded(snapshot.hash)
     return { html: rendered.html, css: rendered.css, diagnostics: rendered.diagnostics, hash: snapshot.hash }
   })

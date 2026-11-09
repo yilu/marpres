@@ -22,7 +22,7 @@ npm run dev -- slides/my-talk.md --port 3031
 
 Open `http://127.0.0.1:3031`. The server stays running until Ctrl+C and edits the file supplied to it. With no file argument, `npm run dev` opens the demo at `http://127.0.0.1:3030`. The build command works independently of this server.
 
-Output goes to `dist/my-talk.html` and `dist/my-talk.pdf`. With no file argument, `npm run build` builds the demo. A successful build exits with status 0; invalid layouts, unreadable assets, and rendering or browser failures produce a nonzero status. Read the reported diagnostics before using the output. An HTML file may already have been written if the later PDF step fails.
+Output goes to `dist/my-talk.html` and `dist/my-talk.pdf`. HTML loads original images from the shared `dist/assets/` folder; share the HTML together with that folder. Identical images share one file, with no resizing or compression. Add `--embed-images` to build a single portable HTML file instead. Use `--link-images` instead to reference the original figures relative to the HTML, without making an asset copy; keep that folder layout when moving the deck. These two flags cannot be combined. PDF files are self-contained. With no file argument, `npm run build` builds the demo. A successful build exits with status 0; invalid layouts, unreadable assets, and rendering or browser failures produce a nonzero status. Read the reported diagnostics before using the output. An HTML file may already have been written if the later PDF step fails.
 
 PDF export and browser checks require installed Google Chrome. Set `CHROME_PATH` to a different browser executable when needed:
 
@@ -249,7 +249,13 @@ A free annotation.
 
 Free objects leave the main layout flow. Moving a normal panel object keeps its panel membership and reserves its original flow space. Large manual offsets can move it outside the panel or slide. After a substantial content change, **Reset layout offsets** returns a layout object to its automatic position. The corresponding action for a free object moves it to its origin.
 
-Shared geometry options are `dx`, `dy`, `width`, `height`, `stage`, and `layer`, subject to each object kind. Width/height range from 1 to 10000, and offsets from −10000 to 10000. Figures derive height instead. `layer` is an integer from −99 to 99; higher values draw above lower ones within their stacking context. Arrange offers **Bring front** and **Send back**.
+Shared geometry options are `dx`, `dy`, `width`, `height`, `stage`, and `layer`, subject to each object kind. Width/height range from 1 to 10000, and offsets from −10000 to 10000. Figures derive height instead. `layer` is an integer from −99 to 99; higher values draw above lower ones within their stacking context. The inspector offers **To front**, **Forward**, **Backward**, and **To back**. Each move is saved to Markdown and is one undo operation.
+
+### Selecting and ordering layers
+
+Choose **Layers** at the top of the right inspector to see every editable object on the current slide, ordered from front to back. Click a row to select an object even when another object completely covers it. Shift-click (or Cmd/Ctrl-click) rows to add or remove objects from the selection. Up/Down and Home/End navigate the list without moving objects on the canvas; **Format** returns to the selected object's properties.
+
+**To front** and **To back** move the selection to an edge of its stack. **Forward** and **Backward** cross one neighboring object. Multi-selection preserves the selected objects' internal order. Indented children move within their parent; reordering never changes their geometry or layout membership. Selecting an object hidden by the current reveal preview switches the preview to All without changing authored reveal stages.
 
 ### Inserting into a panel
 
@@ -258,6 +264,8 @@ Shared geometry options are `dx`, `dy`, `width`, `height`, `stage`, and `layer`,
 ### Aligning and distributing
 
 Shift-click to add or remove objects from a selection. Drag on empty canvas to select several. You can drag the selection together and undo that movement in one step.
+
+Hold **Shift while dragging** to constrain movement to one axis. The first movement chooses horizontal or vertical, measured from the drag's starting position; the axis stays fixed while Shift is held. Release Shift to resume free movement. You can also press Shift after starting a drag. The constraint works with text, shapes, cropped figures and multi-selections; snapping can adjust the active axis without moving the locked coordinate.
 
 Choose an **Align to** target before using left/centre/right or top/middle/bottom alignment:
 
@@ -366,6 +374,7 @@ External file edits trigger a source conflict. Save the external edit, choose **
 | Action | Shortcut or control |
 | --- | --- |
 | Fine movement | Arrow keys; Shift+Arrow moves 10 pixels |
+| Horizontal/vertical movement | Hold Shift while dragging |
 | Undo / redo | Cmd/Ctrl+Z / Cmd/Ctrl+Shift+Z |
 | Add/remove selection | Shift-click |
 | Select a region | Drag on empty canvas |

@@ -51,9 +51,10 @@ function renderedStages(html) {
 }
 
 export class PresentationStore {
-  constructor(store, { render = renderSource, limit = 12 } = {}) {
+  constructor(store, { render = renderSource, limit = 12, resolveAsset } = {}) {
     this.store = store
     this.render = render
+    this.resolveAsset = resolveAsset
     this.limit = limit
     this.sessions = new Map()
   }
@@ -65,7 +66,7 @@ export class PresentationStore {
       const mapping = mapSource(current.source)
       if (!Number.isInteger(slide) || !mapping.slides[slide - 1]) throw new SourceError('Choose a valid starting slide.')
       const notes = readNotes(current.source).map(text => ({ text, html: renderNotes(text) }))
-      const rendered = await this.render(stripNotes(current.source), { baseDir: dirname(this.store.file), draft: false })
+      const rendered = await this.render(stripNotes(current.source), { baseDir: dirname(this.store.file), draft: false, resolveAsset: this.resolveAsset })
       await this.store.guarded(current.hash)
       const errors = (rendered.diagnostics ?? []).filter(item => item.severity === 'error')
       if (errors.length) throw new SourceError(`Cannot present this deck: ${errors.map(item => item.message).join('; ')}`)

@@ -349,3 +349,22 @@ body.presenting #notes-pane { display: none !important; }
 #presenter-fallback a { color: #7b56ad; font-weight: 600; }
 #presenter-fallback button { border: 0; padding: 0 3px; color: #a495ad; }
 @media (max-width: 1000px) { .notes-private { display: none; } .notes-heading #close-notes { margin-left: auto; } #notes-pane { height: 165px; } }
+
+/* Layers remain reachable before selecting an object on the canvas. */
+.inspector-tabs { display: flex; gap: 4px; }
+.inspector-tabs [role="tab"] { min-height: 28px; padding: 4px 8px; border-color: transparent; background: transparent; font-size: 12px; font-weight: 600; }
+.inspector-tabs [aria-selected="true"] { color: var(--accent); background: var(--accent-soft); }
+.layers-heading { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; color: var(--muted); font-size: 11px; }
+#layers-count { font-variant-numeric: tabular-nums; }
+.layer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 7px 0 12px; }
+.layer-actions button { min-width: 0; min-height: 28px; padding: 4px; font-size: 10px; }
+#layer-list { display: flex; flex-direction: column; gap: 3px; }
+.layer-row { width: 100%; min-height: 36px; justify-content: flex-start; padding: 6px 7px 6px calc(7px + var(--layer-depth, 0) * 12px); border-color: transparent; background: transparent; text-align: left; }
+.layer-row .icon { flex: none; width: 15px; color: #8d819c; }
+.layer-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.layer-stage { flex: none; font-size: 9px; color: var(--muted); }
+.layer-row[aria-selected="true"] { color: #6045b5; background: var(--accent-soft); border-color: #cabbeb; }
+.layer-hidden-stage .layer-label { color: var(--muted); font-style: italic; }
+
+#inspector .inspector-heading { position: sticky; top: 0; z-index: 2; background: #fff; }
+\n.layer-group { display: flex; align-items: center; gap: 7px; padding: 8px 7px 4px calc(7px + var(--layer-depth, 0) * 12px); color: var(--muted); }\n.layer-group .icon { width: 15px; flex: none; }\n

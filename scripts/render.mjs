@@ -1,6 +1,6 @@
 import { Marp } from '@marp-team/marp-core'
 import { readFile } from 'node:fs/promises'
-import { readFileSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { dirname,resolve,extname } from 'node:path'
 import layout from '../engine/layout.mjs'
@@ -32,11 +32,11 @@ function enableManagedPageNumbers(marp, source) {
  })
 }
 
-export async function renderFile(file,{draft=false}={}) {
- return renderSource(await readFile(file,'utf8'),{baseDir:dirname(resolve(file)),draft})
+export async function renderFile(file,options={}) {
+ return renderSource(await readFile(file,'utf8'),{...options,baseDir:dirname(resolve(file))})
 }
-export async function renderSource(source,{baseDir=process.cwd(),draft=false}={}) {
- const diagnostics=[]
+export async function renderSource(source,{baseDir=process.cwd(),draft=false,resolveAsset}={}) {
+ const diagnostics=[], dependencies=[], assets=new Map()
  baseDir=resolve(baseDir)
  const marp=new Marp({html:true,inlineSVG:true}).use(layout,{baseDir,onDiagnostic:d=>diagnostics.push(d)})
  for(const theme of themes)marp.themeSet.add(theme)
@@ -48,11 +48,27 @@ export async function renderSource(source,{baseDir=process.cwd(),draft=false}={}
  let {html,css}=marp.render(source)
  html=html.replace(/(<img\b[^>]*\bsrc=")([^"]+)(")/g,(all,start,src,end)=>{
    if(/^(?:data:|https?:|\/\/)/.test(src))return all
-   try {const path=resolve(baseDir,decodeURIComponent(src.replace(/&amp;/g,'&')));return start+`data:${mime[extname(path).toLowerCase()]||'application/octet-stream'};base64,${readFileSync(path).toString('base64')}`+end}
+   try {
+     const path=resolve(baseDir,decodeURIComponent(src.replace(/&amp;/g,'&')))
+     if(!assets.has(path)) {
+       const bytes=readFileSync(path),type=mime[extname(path).toLowerCase()]||'application/octet-stream',stat=statSync(path)
+       dependencies.push({path,mtimeMs:stat.mtimeMs,ctimeMs:stat.ctimeMs,size:stat.size})
+       assets.set(path,resolveAsset?resolveAsset(bytes,type,path):`data:${type};base64,${bytes.toString('base64')}`)
+     }
+     return start+assets.get(path)+end
+   }
    catch {diagnostics.push({severity:'error',code:'missing-asset',message:`Cannot read ${src}`});return all}
  })
- return {html,css,diagnostics,source,hash:createHash('sha256').update(source).digest('hex'),draft}
+ return {html,css,diagnostics,source,...(resolveAsset?{dependencies}:{}),hash:createHash('sha256').update(source).digest('hex'),draft}
 }
 export function documentHTML({html,css},title='Marpres') {
- return `<!doctype html><html><head><meta charset="utf-8"><title>${title.replace(/[<>&]/g,'')}</title><style>${css}\nhtml,body{margin:0;background:#ddd}.marpit>svg{display:block;margin:24px auto;box-shadow:0 2px 10px #0003;max-width:100%;height:auto}@media print{html,body{background:white}.marpit>svg{margin:0;box-shadow:none;max-width:none}}${stagePageCSS}</style></head><body>${html}<script>(${installStagePages.toString()})();</script></body></html>`
+ // Store each image once in the portable file, then hydrate before stage cloning.
+ const assets=[],indices=new Map()
+ html=html.replace(/(<img\b[^>]*?)\bsrc="(data:[^"]+)"/g,(all,start,src)=>{
+   if(!indices.has(src)){indices.set(src,assets.length);assets.push(src)}
+   return start+`data-embedded-image="${indices.get(src)}"`
+ })
+ const hydrate=assets.length?`<script>(function(assets){document.querySelectorAll('[data-embedded-image]').forEach(image=>{image.src=assets[Number(image.getAttribute('data-embedded-image'))];image.removeAttribute('data-embedded-image')})})(${JSON.stringify(assets).replaceAll('<','\\u003c')});</script>`:''
+
+ return `<!doctype html><html><head><meta charset="utf-8"><title>${title.replace(/[<>&]/g,'')}</title><style>${css}\nhtml,body{margin:0;background:#ddd}.marpit>svg{display:block;margin:24px auto;box-shadow:0 2px 10px #0003;max-width:100%;height:auto}@media print{html,body{background:white}.marpit>svg{margin:0;box-shadow:none;max-width:none}}${stagePageCSS}</style></head><body>${html}${hydrate}<script>(${installStagePages.toString()})();</script></body></html>`
 }

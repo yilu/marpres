@@ -49,6 +49,8 @@ To start your own presentation:
 npm run dev -- slides/my-talk.md --port 3031
 ```
 
+Keep Marpres in one Git checkout and pass the path to any talk's Markdown file, including files outside the repository. Talk folders need only their source, figures, supporting materials and exports; they do not need copies of the editor or engine. Make application changes in this repository and keep talk-specific styling in the deck source.
+
 Open **http://127.0.0.1:3031**. Keep the terminal running; press Ctrl+C to stop the editor. If Chrome is installed at a different location, set `CHROME_PATH` to its executable before exporting or running browser tests:
 
 ```sh
@@ -81,6 +83,10 @@ Shift-click objects, or drag on empty canvas, to select several. **Arrange → A
 
 Figure alignment uses the visible cropped frame. Double-click a figure to drag its crop edges or pan the image inside the crop; Enter applies and Escape cancels. The source image stays intact. **Fit** and **25–200%** zoom change the view; hold Space and drag to pan.
 
+Hold **Shift while dragging** to move only horizontally or vertically. The initial movement chooses the axis, which stays locked until you release Shift. This works for single objects and multi-selections, with snapping retained along the active axis. Shift-click still adds or removes objects from the selection.
+
+Choose **Layers** in the right inspector to select covered objects from a front-to-back list. **To front**, **Forward**, **Backward**, and **To back** change stacking order and support undo/redo. Shift-click rows for multi-selection; nested objects remain inside their parent. Switch back to **Format** to edit properties.
+
 ### Source, text, and history
 
 The horizontal toolbar formats whole text blocks. The text editor has separate buttons for formatting selected words. Math and Markdown remain in the source. Text drafts survive selection changes; Preview, Present, and PDF export save valid drafts first and stop for unresolved conflicts.
@@ -100,7 +106,7 @@ npm run build
 npm run build -- slides/my-talk.md
 ```
 
-The first command writes `dist/demo.html` and `dist/demo.pdf`; the second writes `dist/my-talk.html` and `dist/my-talk.pdf`. Neither command requires the GUI or a running editor server. Exports use the current Marpres renderer without editing guides or selection handles. For the original template, use the [Marp CLI configuration](docs/compatibility.md#build-an-existing-legacy-deck).
+The first command writes `dist/demo.html` and `dist/demo.pdf`; the second writes `dist/my-talk.html` and `dist/my-talk.pdf`. HTML exports keep original image bytes in a shared `dist/assets/` folder. Copy that folder alongside the HTML when sharing; PDF files remain self-contained. For a single portable HTML file, use `npm run build -- slides/my-talk.md --embed-images`. For local output that links the original figures without copying them, use `--link-images`; preserve their relative folder layout. The two options are mutually exclusive. Neither command requires the GUI or a running editor server. Exports use the current Marpres renderer without editing guides or selection handles. For the original template, use the [Marp CLI configuration](docs/compatibility.md#build-an-existing-legacy-deck).
 
 Reveals are cumulative: stage 0 appears first, followed by each used positive stage. PDF contains one page per stage; exported HTML provides stage navigation. Slides without reveals export as one page each. The [authoring guide](docs/authoring.md#reveal-stages-and-playback) explains the details.
 
@@ -149,3 +155,5 @@ Feature browser checks use temporary decks; layout checks render the demo and fi
 ## License
 
 Marpres code and documentation are licensed under the [MIT License](LICENSE), copyright © 2026 Yi Lu and Marpres contributors. Third-party dependencies, the Outfit font, and retained institutional-logo fixtures have their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md). The software license does not change ownership of presentations or images you create or import.
+
+Performance characteristics and verification are recorded in [the editor performance audit](docs/performance.md).
